@@ -3,12 +3,12 @@
 TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir rehber.
 
 İçindekiler:
-* Giriş
-* Kurulum
-* Korkmayın
-* Haskell'e Giriş
-    * Fonksiyon tanımı
-    * Tip örneği
+* [Giriş](#1-giri%C5%9F)
+* [Kurulum](#11-kurulum)
+* [Korkmayın](#12-korkmay%C4%B1n)
+* [Haskell'e Giriş](#13-haskelle-giri%C5%9F)
+    * [Fonksiyon tanımı](#131-fonksiyon-tan%C4%B1m%C4%B1)
+    * [Tip örneği](#132-tip-%C3%B6rne%C4%9Fi)
 * Temel Haskell
 * Notasyon
     * Aritmetik
@@ -36,6 +36,8 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
     * Liste Monad'ı
 * Ek
 * Sonsuz Ağaçlar Hakkında
+
+***
 
 Tüm geliştiricilerin Haskell öğrenmesi gerektiğine inanıyorum. Herkesin süper Haskell ninjası olması gerektiğini düşünmüyorum, ama herkes Haskell'in sahip olduğu farklı yönleri görmeli. Haskell öğrenmek zihninizi acar.
 
@@ -156,20 +158,20 @@ Haskell'de bir `main` fonksiyonu vardır ve her nesnenin bir tipi vardır. `main
 
 Devam etmeden önce, Haskell'in bazı temel özelliklerinin farkına varmanız gerekiyor.
 
-*Fonksiyonel*
+#### Fonksiyonel
 Haskell fonksiyonel bir dildir. Eğer imperatif bir dilde geçmişiniz varsa, yeni bir sürü şey öğrenmeniz gerekiyor. Umarım bu yeni kavramlar size imperatif dillerde program yazarken bile yardımcı olur.
 
-*Akıllı Statik Tip Sistemi*
+#### Akıllı Statik Tip Sistemi
 
 Tip sistemi, `C`'de, `C++`'ta, `Java`'da olduğu gibi sizi engellemek yerine, size yardım etmek için var.
 
-*Saflık*
+#### Saflık
 Genellikle fonksiyonlarınız dış dünyada bir şeyi değiştirmeyecekler. Bu demek oluyor ki, bir değişkenin değerini değiştiremeyecekler, kullanıcıdan girdi alamayacaklar, ekrana yazı yazamayacaklar, veya bir füzeyi ateşleyemeyecekler. Diğer yandan, paralellik sağlamak çok kolay olacak. Haskell nerede yan etkilerin olduğunun ve nerede kodunuzun saf olduğunun ayrımını çok açık bir şekilde yapar. Ayrıca, programınız hakkında mantık yürütmek de çok daha kolay olur. Çoğu hata, kodunuzun saf kısmında engellecektir.
 
 Daha da ötesi, Haskell'de saf fonksiyonlar temel bir kural izlerler:
 > Bir fonksiyona aynı parametreleri vermek her zaman aynı değerleri döndürür.
 
-*Tembellik*
+#### Tembellik
 Tembellik, genelde alışılmadık bir dil tasarım tercihidir. Haskell'de varsayılan olarak her şey sadece ihtiyaç olduğunda hesaplanır / işlenir. Bunun sonuçlarından biri de sonsuz yapıları işlemek için çok mükemmel bir yol sunmasıdır.
 
 Son uyarı da Haskell kodunu nasıl okumanız gerektiğiyle ilgili. Benim için, bilimsel makaleleri okumak gibi. Bazı kısımları çok açık, ama bir formül gördünüzde odaklanın ve yavaşça okuyun. Ayrıca, Haskell öğrenirken, garip söz dizimsel detayları anlamamanız *gerçekten* önemli değil. Ama eğer `>>=`, `<$>`, `<-` v.b. herhangi bir garip sembol görürseniz, görmezden gelin ve kodun akışını takip edin.
