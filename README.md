@@ -4,21 +4,21 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
 
 #### İçindekiler:
 * [Giriş](#1-giri%C5%9F)
-* [Kurulum](#11-kurulum)
-* [Korkmayın](#12-korkmay%C4%B1n)
-* [Haskell'e Giriş](#13-haskelle-giri%C5%9F)
-    * [Fonksiyon tanımı](#131-fonksiyon-tan%C4%B1m%C4%B1)
-    * [Tip örneği](#132-tip-%C3%B6rne%C4%9Fi)
+    * [Kurulum](#11-kurulum)
+    * [Korkmayın](#12-korkmay%C4%B1n)
+    * [Haskell'e Giriş](#13-haskelle-giri%C5%9F)
+        * [Fonksiyon tanımı](#131-fonksiyon-tan%C4%B1m%C4%B1)
+        * [Tip örneği](#132-tip-%C3%B6rne%C4%9Fi)
 * [Temel Haskell](#2-temel-haskell)
-* Notasyon
-    * Aritmetik
-    * Mantıksal
-    * Kuvvetler
-    * Listeler
-    * Karakter Dizileri
-    * Demetler *(Tuple)*
-    * Parantezlerle Baş Etmek
-* Fonksiyonlar için Faydalı Notasyonlar
+    * Notasyon
+        * Aritmetik
+        * Mantıksal
+        * Üslü Sayılar
+        * Listeler
+        * Karakter Dizileri
+        * Demetler *(Tuple)*
+        * Parantezlerle Baş Etmek
+    * Fonksiyonlar için Faydalı Notasyonlar
 * Zor Kısım
 * Fonksiyonel Stil
     * Üst Derece Fonksiyonlar
@@ -398,3 +398,191 @@ Eğer bunun kötü bir fikir olduğunu ve derleyicinin sizin için bir tipten di
 # 2. Temel Haskell
 
 ![Essential](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/kandinsky_gugg.jpg)
+
+Bu kısma yalnızca göz gezdirmenizi tavsiye ediyorum. Her zaman yararlanacağınız bir kaynak gibi düşünün. Haskell'in birçok özelliği vardır. Burada da pek çoğu eksik. Eğer notasyon garip gelirse tekrar buraya dönün.
+
+İki ifadenin denk olduğunu belirtmek için `⇔` işaretini kullanıyorum. Bu sahte bir notasyon, `⇔` Haskell'de mevcut değil. Aynı şekilde, bir ifadenin hesaplanan değerinin ne olduğunu belirtmek için de `⇒` işaretini kullanacağım.
+
+## 2.1. Notasyon
+
+### Aritmetik
+
+``` haskell
+3 + 2 * 6 / 3 ⇔ 3 + ((2*6)/3)
+```
+
+### Mantıksal
+
+```haskell
+True || False ⇒ True
+True && False ⇒ False
+True == False ⇒ False
+True /= False ⇒ True  (/=) esit degildir operatorudur
+```
+
+### Üslü Sayılar
+
+```haskell
+x^n     herhangi bir n integral tipi icin (Int veya Integer olarak anlayin)
+x**y    herhangi bir y sayi tipi icin (ornegin Float)
+```
+
+`Integer`'ın bilgisayarınızın kapasitesi dışında bir sınırı yoktur.
+
+```
+4^103
+102844034832575377634685573909834406561420991602098741459288064
+```
+
+Evet! Ayrıca rasyonel sayılar da var! Ama önce `Data.Ratio` modülünü içeri aktarmanız gerekiyor:
+
+```
+$ ghci
+....
+Prelude> :m Data.Ratio
+Data.Ratio> (11 % 15) * (5 % 3)
+11 % 9
+```
+
+### Listeler
+
+```
+[]                      ⇔ bos liste
+[1,2,3]                 ⇔ integral listesi
+["foo","bar","baz"]     ⇔ String listesi
+1:[2,3]                 ⇔ [1,2,3], (:) bir elemani one ekleme
+1:2:[]                  ⇔ [1,2]
+[1,2] ++ [3,4]          ⇔ [1,2,3,4], (++) birlestirme
+[1,2,3] ++ ["foo"]      ⇔ HATA String ≠ Integral
+[1..4]                  ⇔ [1,2,3,4]
+[1,3..10]               ⇔ [1,3,5,7,9]
+[2,3,5,7,11..100]       ⇔ HATA! O kadar da akilli degilim!
+[10,9..1]               ⇔ [10,9,8,7,6,5,4,3,2,1]
+```
+
+### Karakter Dizileri
+
+Haskell'de `String` tipi, `Char` tipinden oluşmuş listeye denktir.
+
+```
+'a' :: Char
+"a" :: [Char]
+""    ⇔ []
+"ab"  ⇔ ['a','b'] ⇔  'a':"b" ⇔ 'a':['b'] ⇔ 'a':'b':[]
+"abc" ⇔ "ab"++"c"
+```
+
+> Dikkat: Gerçek kodda, yazıyı temsil etmek için `Char` listesi kullamamalısınız. Genel olarak `Data.Text` kullanmalısınız. Eğer ASCİİ karakter akımını *(stream)* temsil etmek istiyorsanız, onun için de `Data.ByteString` kullanmalısınız.
+
+### Demetler *(Tuple)*
+
+Bir ikili demetin tipi `(a,b)`'dir. Demetlerdeki elemanlar farklı tipte olabilirler.
+
+```haskell
+-- Tum bu demetler gecerlidir
+(2,"foo")
+(3,'a',[2,3])
+((2,"a"),"c",3)
+
+fst (x,y)       ⇒  x
+snd (x,y)       ⇒  y
+
+fst (x,y,z)     ⇒  HATA: fst :: (a,b) -> a
+snd (x,y,z)     ⇒  HATA: snd :: (a,b) -> b
+```
+
+### Parantezlerle Başa Çıkmak
+
+Bazı parantezlerden kurtulmak için `($)` ve `(.)` fonksiyonlarını kullanabilirsiniz.
+
+```haskell
+-- Aslinda:
+f g h x         ⇔  (((f g) h) x)
+
+-- $ isareti kendisinden ifadenin sonuna
+-- kadar olan parantezin yerine gecer
+f g $ h x       ⇔  f g (h x) ⇔ (f g) (h x)
+f $ g h x       ⇔  f (g h x) ⇔ f ((g h) x)
+f $ g $ h x     ⇔  f (g (h x))
+
+-- (.) kompozisyon fonksiyonu
+(f . g) x       ⇔  f (g x)
+(f . g . h) x   ⇔  f (g (h x))
+```
+
+***
+
+[01_basic/20_Essential_Haskell/10a_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/20_Essential_Haskell/10a_Functions.lhs)
+
+## 2.2. Fonksiyonlar için Faydalı Notasyonlar
+
+Hatırlatma:
+
+```haskell
+x :: Int            ⇔ x Int tipinde herhangi bir deger alabilir
+x :: a              ⇔ x herhangi bir tip olabilir
+x :: Num a => a     ⇔ x Num tip sinifina dahil olan 
+                         herhangi bir a tipi olabilir
+f :: a -> b         ⇔ f a'dan b'ye bir fonksiyondur
+f :: a -> b -> c    ⇔ f a'dan (b→c)'ye bir fonksiyondur
+f :: (a -> b) -> c  ⇔ f (a→b)'den c'ye bir fonksiyondur
+```
+
+Hatırlayın ki bir fonksiyonu tanımlamadan önce tipini belirtmek zorunlu değil. Haskell genelde tip çıkarımını sizin için kendisi yapar. Ama genelde tipleri belirtmek iyi uygulama olarak görülür.
+
+#### Orta notasyon
+
+```haskell
+square :: Num a => a -> a  
+square x = x^2
+```
+
+`^` işaretinin orta notasyon kullandığına dikkat edin. Her orta notasyon için bir başta notasyon vardır. Sadece parantez içine koymak durumundasınız.
+
+```haskell
+square' x = (^) x 2
+
+square'' x = (^2) x
+```
+
+Soldaki ve sağdaki `x`'leri silebiliriz. Buna η sadeleştirmesi deniyor.
+
+```haskell
+square''' = (^2)
+```
+
+Değişken isimlerinde `'` kullanabildiğimize dikkat edin.
+
+> `square` ⇔ `square'` ⇔ `square''` ⇔ `square'''`
+
+### Testler
+
+Mutlak değer fonksiyonu yazalım:
+
+```haskell
+absolute :: (Ord a, Num a) => a -> a
+absolute x = ıf x >= 0 then x else -x
+```
+
+Dikkat edin ki Haskell'deki `if .. then .. else` notasyonu, C'deki `¤?¤:¤` operatörüne çokça benziyor. `else` kısmını unutmanız mümkün değil.
+
+Denk başka bir versiyonu:
+
+```haskell
+absolute' x
+    | x >= 0 = x
+    | otherwise = -x
+```
+
+> Haskell'de paragraf başı / boşluklar önemlidir. Python'daki gibi kötü boşluklar kodunuzu bozabilir.
+
+[01_basic/20_Essential_Haskell/10a_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/20_Essential_Haskell/10a_Functions.lhs)
+
+# 3. Zor Kısım
+
+Zor kısım şimdi başlayabilir.
+
+## 3.1. Fonksiyonel Stil
+
+![Functional](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/hr_giger_biomechanicallandscape_500.jpg)
+
