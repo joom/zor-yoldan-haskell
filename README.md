@@ -2,14 +2,14 @@
 
 TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir rehber.
 
-İçindekiler:
+#### İçindekiler:
 * [Giriş](#1-giri%C5%9F)
 * [Kurulum](#11-kurulum)
 * [Korkmayın](#12-korkmay%C4%B1n)
 * [Haskell'e Giriş](#13-haskelle-giri%C5%9F)
     * [Fonksiyon tanımı](#131-fonksiyon-tan%C4%B1m%C4%B1)
     * [Tip örneği](#132-tip-%C3%B6rne%C4%9Fi)
-* Temel Haskell
+* [Temel Haskell](#2-temel-haskell)
 * Notasyon
     * Aritmetik
     * Mantıksal
@@ -223,3 +223,178 @@ Unutmayın, Haskell fonksiyonları ve tipleri sıkça kullanır. Bu yüzden, onl
 
 ### 1.3.2. Tip örneği
 
+Zorunlu olmamasına rağmen, fonksiyonlar için tip bilgisi genellikle ayrıca girilir. Zorunlu değildir, çünkü derleyici sizin için çıkarım yapacak kadar akıllıdır. Yine de tipleri yazmak iyi bir fikirdir, çünkü kodun anlaşılmasına yardımcı olur.
+
+Bakalım nasıl oluyormuş:
+
+```haskell
+-- Tipleri belirtmek icin :: isaretini kullaniyoruz
+f :: Int -> Int -> Int
+f x y = x*x + y*y
+
+main = print (f 2 3)
+```
+
+```
+~ runhaskell 20_very_basic.lhs
+13
+```
+[01_basic/10_Introduction/20_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/20_very_basic.lhs)
+
+***
+[01_basic/10_Introduction/21_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/21_very_basic.lhs)
+
+Şimdi bunu deneyelim:
+
+```haskell
+f :: Int -> Int -> Int
+f x y = x*x + y*y
+
+main = print (f 2.3 4.2)
+```
+
+Şu hatayı almış olmalısınız:
+
+```
+21_very_basic.lhs:6:23:
+    No instance for (Fractional Int)
+      arising from the literal `4.2'
+    Possible fix: add an instance declaration for (Fractional Int)
+    In the second argument of `f', namely `4.2'
+    In the first argument of `print', namely `(f 2.3 4.2)'
+    In the expression: print (f 2.3 4.2)
+```
+Sorun şu: `4.2` bir tam sayı (Int) değil.
+
+[01_basic/10_Introduction/21_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/21_very_basic.lhs)
+
+***
+
+[01_basic/10_Introduction/22_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/22_very_basic.lhs)
+
+Çözümü de şu: `f` fonksiyonu için şimdilik bir tip belirtmeyelim ve Haskell'in tip çıkarımı yapmasına izin verelim.
+
+```haskell
+f x y = x*x + y*y
+
+main = print (f 2.3 4.2)
+```
+
+Çalışıyor! Ne şanslıyız ki, her tip için yeni bir fonksiyon tanımlamak zorunda değiliz. Örneğin `C`'de, `int` için, `float` için, `long` için, `double` için vs. ayrı ayrı fonksiyon tanımlamak zorundayız.
+
+Peki hangi tipi belirtmeliydik? Haskell'in bizim için bulduğu tipi görmek için `ghci`'yi başlatın:
+
+```
+% ghci
+GHCi, version 7.0.4: http://www.haskell.org/ghc/  :? for help
+Loading package ghc-prim ... linking ... done.
+Loading package integer-gmp ... linking ... done.
+Loading package base ... linking ... done.
+Loading package ffi-1.0 ... linking ... done.
+Prelude> let f x y = x*x + y*y
+Prelude> :type f
+f :: Num a => a -> a -> a
+```
+
+Hi? Bu garip tip de neyin nesi?
+
+```
+Num a => a -> a -> a
+```
+
+İlk önce, sağdaki `a -> a -> a` kısmına bakalım. Anlamak için kademeli olarak şu örnekleri inceleyelim:
+
+| Yazılı Tip   | Anlamı                                                                  |
+| ------------ | ----------------------------------------------------------------------- |
+| Int          | Int tipi                                                                |
+| Int -> Int   | Int'ten Int'e olan fonksiyon tipi                                       |
+| Float -> Int | Float'tan Int'e olan fonksiyon tipi                                     |
+| a -> Int     | herhangi bir tipten Int'e olan fonksiyon tipi                           |
+| a -> a       | herhangi bir a tipinden aynı a tipine olan fonksiyon tipi               |
+| a -> a -> a  | herhangi bir a tipinden iki argümanın aynı a tipine olan fonksiyon tipi |
+
+`a -> a -> a` tipinde, `a` harfine tip değişkeni diyoruz. (type variable). Bu `f`'nin iki argümanı olduğu, ve girilen argümanlar ve fonksiyon sonucunun aynı tipten olduğu anlamına geliyor. Tip değişkeni `a`, başka bir sürü değer alabilir. Örneğin `Int`, `Integer`, `Float`...
+
+Yani `C`'deki gibi zorunlu olarak bir fonksiyon için `int`, `long`, `float`, `double` vs. gibi tip belirtmek yerine, herhangi bir dinamik tip sistemli dil gibi sadece bir fonksiyon tanımlıyoruz.
+
+Buna bazen parametrik çokşekillilik *(parametric polymorphism)* de deniyor. Hayatta her istediğinizin olması gibi bir şey.
+
+Genellikle `a` herhangi bir tip olabilir, örneğin `String` veya `Int`, ama `Trees` gibi daha karışık tipler, başka fonksiyonlar da olabilir. Ama buradaki tipimiz `Num a =>` ile başlıyor.
+
+`Num` bir tip sınıfı. *(type class)*. Tip sınıfları tip grupları gibi düşünülebilir. `Num` sınıfı sadece sayı gibi davranan tipleri içerir. Daha doğrusu, `Num`, belli bir fonksiyon listesinin, özellikle `(+)` ve `(*)` fonksiyonlarının, etki ettiği sınıftır.
+
+Tip sınıfları güçlü bir dil yapısıdır. Onlarla inanılmaz güçlü şeyler yapabiliriz. Buna daha sonra tekrar değineceğiz.
+
+Sonuç olarak, `Num a => a -> a -> a` şu demek oluyor:
+
+Diyelim ki `a`, `Num` tip sınıfına ait bir tip. Bu da `a` tipinden `a -> a` tipine bir fonksiyon.
+
+Evet, garip. Aslında Haskell'de hiçbir fonksiyonun gerçekten iki argümanı yoktur. Onun yerine, her fonksiyonun sadece bir argümanı vardır. Ama hatırlamalıyız ki iki argüman almakla, bir argüman alıp ikinci argümanı bir parametre olarak alan bir fonksiyon döndürmek denk şeylerdir.
+
+Daha açık olmak gerekirse, `f 3 4`, `(f 3) 4`'e denktir. `f 3`'un de bir fonksiyon olduğuna dikkat edin:
+
+```haskell
+f :: Num a => a -> a -> a
+
+g :: Num a => a -> a
+g = f 3
+
+g y ⇔ 3*3 + y*y
+```
+
+Fonksiyonlar için bir notasyon daha var. Lambda notasyonu isimsiz fonksiyonlar yaratmamıza olanak sağlar. Bunlara anonim fonksiyonlar diyoruz. Aynı şeyi lambda notasyonuyla şöyle de yazabilirdik:
+
+```haskell
+g = \y -> 3*3 + y*y
+```
+
+Burada `\` kullanılıyor, çünkü `λ` (lambda) harfine benziyor, ve aynı zamanda ASCII dizisine dahil.
+
+Eğer fonksiyon programlamaya alışık değilseniz beyniniz yanmaya başlamış olmalı. Artık gerçek bir uygulama yazma zamanı.
+
+[01_basic/10_Introduction/22_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/22_very_basic.lhs)
+
+***
+
+[01_basic/10_Introduction/23_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/23_very_basic.lhs)
+
+Ama ondan önce, tip sisteminin beklediğimiz gibi çalıştığını doğrulayalım:
+
+```haskell
+f :: Num a => a -> a -> a
+f x y = x*x + y*y
+
+main = print (f 3 2.4)
+```
+
+Çalışıyor, çünkü `3` hem `Float` gibi kesirli *(Fractional)* sayılar için, hem de `Integer` (tam sayı tipi) için geçerli bir gösterim. `2.4` kesirli bir sayı olduğu için `3` de kesirli bir sayı olarak yorumlanıyor.
+
+[01_basic/10_Introduction/23_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/23_very_basic.lhs)
+
+***
+
+[01_basic/10_Introduction/24_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/24_very_basic.lhs)
+
+Eğer fonksiyonumuzu farklı tiplerle çalışmaya zorlarsak, hata verecektir:
+
+```haskell
+f :: Num a => a -> a -> a
+f x y = x*x + y*y
+
+x :: Int
+x = 3
+y :: Float
+y = 2.4
+main = print (f x y) -- calismayacak, cunku tip x ≠ tip y
+```
+
+Derleyici hata veriyor. İki parametre de aynı tipten olmak zorunda.
+
+Eğer bunun kötü bir fikir olduğunu ve derleyicinin sizin için bir tipten diğerine dönüşümü yapması gerektiğini düşünüyorsanız, bu müthiş (ve komik) videoyu mutlaka izlemelisiniz: [WAT](https://www.destroyallsoftware.com/talks/wat)
+
+[01_basic/10_Introduction/24_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/24_very_basic.lhs)
+
+
+# 2. Temel Haskell
+
+![Essential](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/kandinsky_gugg.jpg)
