@@ -16,7 +16,7 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
     * Kuvvetler
     * Listeler
     * Karakter Dizileri
-    * Demetler (Tüple)
+    * Demetler *(Tuple)*
     * Parantezlerle Baş Etmek
 * Fonksiyonlar için Faydalı Notasyonlar
 * Zor Kısım
@@ -25,7 +25,7 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
 * Tipler
     * Tip Çıkarımı
     * Tip İnşası
-    * Özyinelemeli Tipler (Recursive types)
+    * Özyinelemeli Tipler *(Recursive types)*
     * Ağaçlar
 * Sonsuz Yapılar
 * Çok Zor Kısım
@@ -44,7 +44,7 @@ Tüm geliştiricilerin Haskell öğrenmesi gerektiğine inanıyorum. Herkesin s�
 Anaakım diller aynı temelleri paylaşırlar:
 * değişkenler
 * döngüler
-* işaretçiler (pointer)
+* işaretçiler *(pointer)*
 * veri yapıları, nesneler ve sınıflar (genellikle)
 
 Haskell çok farklıdır. Bu dil daha önce hiç duymamış olduğum bir sürü kavram kullanıyor. Bu kavramların çoğu daha iyi bir programcı olmanızda yardımcı olacaktır.
@@ -62,7 +62,7 @@ Bu yazının beş bölümü var:
 * Temel Haskell: Haskell şöz dizimi ve bazı temel kavramlar.
 * Zor Bölüm:
     * Fonksiyonel stil; imperatif stilden fonksiyonel stile kademeli bir örnek.
-    * Tipler; tipler ve standard bir ikili ağaç (binary tree) örneği.
+    * Tipler; tipler ve standard bir ikili ağaç *(binary tree)* örneği.
     * Sonsuz Yapılar; sonsuz bir ikili ağacı işleyin.
 * Çok Zor Bölüm:
     * IO ile baş edin; minimal bir örnek.
@@ -313,7 +313,7 @@ Num a => a -> a -> a
 | a -> a       | herhangi bir a tipinden aynı a tipine olan fonksiyon tipi               |
 | a -> a -> a  | herhangi bir a tipinden iki argümanın aynı a tipine olan fonksiyon tipi |
 
-`a -> a -> a` tipinde, `a` harfine tip değişkeni diyoruz. (type variable). Bu `f`'nin iki argümanı olduğu, ve girilen argümanlar ve fonksiyon sonucunun aynı tipten olduğu anlamına geliyor. Tip değişkeni `a`, başka bir sürü değer alabilir. Örneğin `Int`, `Integer`, `Float`...
+`a -> a -> a` tipinde, `a` harfine tip değişkeni diyoruz. *(type variable)*. Bu `f`'nin iki argümanı olduğu, ve girilen argümanlar ve fonksiyon sonucunun aynı tipten olduğu anlamına geliyor. Tip değişkeni `a`, başka bir sürü değer alabilir. Örneğin `Int`, `Integer`, `Float`...
 
 Yani `C`'deki gibi zorunlu olarak bir fonksiyon için `int`, `long`, `float`, `double` vs. gibi tip belirtmek yerine, herhangi bir dinamik tip sistemli dil gibi sadece bir fonksiyon tanımlıyoruz.
 
@@ -350,7 +350,7 @@ g = \y -> 3*3 + y*y
 
 Burada `\` kullanılıyor, çünkü `λ` (lambda) harfine benziyor, ve aynı zamanda ASCII dizisine dahil.
 
-Eğer fonksiyon programlamaya alışık değilseniz beyniniz yanmaya başlamış olmalı. Artık gerçek bir uygulama yazma zamanı.
+Eğer fonksiyonel programlamaya alışık değilseniz beyniniz yanmaya başlamış olmalı. Artık gerçek bir uygulama yazma zamanı.
 
 [01_basic/10_Introduction/22_very_basic.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/22_very_basic.lhs)
 
