@@ -1045,7 +1045,7 @@ Peki bu neden önemli? Çünkü bu, hatalardan kaçınmanıza *yüksek derecede*
 
 ### 3.2.1. Tip Çıkarımı
 
-Statik tip sistemi hızlı çalıştırma için genelde önemlidir. Ama çoğu statik tip sistemli diller kavramları genellemede kötüdür. Haskell'in kurtarıcı lütfü, tıpleri kendi kendine *çıkarım* yaparak bulabilmesidir.
+Statik tip sistemi hızlı çalıştırma için genelde önemlidir. Ama çoğu statik tip sistemli diller kavramları genellemede kötüdür. Haskell'in kurtarıcı lütfü, tipleri kendi kendine *çıkarım* yaparak bulabilmesidir.
 
 Basit bir örnekle başlayalım, Haskell'deki `square` fonksiyonu:
 
@@ -1155,7 +1155,7 @@ Ancak bu çok fazla koruma yaratmıyor. `showInfos` fonksiyonuna verdiğiniz par
 putStrLn $ showInfos color name
 ```
 
-Derlenecek ve çalışacak. Aslında, `Name`, `Color` ve `String` tıplerini birbiriyle değiştirebilirsiniz, bir fark yaratmayacak. Derleyici hepsine aynıymış gibi muamele edecek.
+Derlenecek ve çalışacak. Aslında, `Name`, `Color` ve `String` tiplerini birbiriyle değiştirebilirsiniz, bir fark yaratmayacak. Derleyici hepsine aynıymış gibi muamele edecek.
 
 Diğer bir yöntem de `data` anahtar kelimesini kullanarak kendi tiplerinizi yaratmak.
 
@@ -1250,7 +1250,7 @@ data List a = Nil | a ::: (List a)
               deriving (Show,Read,Eq,Ord)
 ```
 
-Veri tıpı tanımınıza `deriving (Show)`'u eklediğinizde, Haskell sizin için bir `show` fonksiyonu yaratır. (*(deriving)* İngilizce'de türeme demektir.) Yakında kendi `show` fonksiyonunuzu nasıl kullanabileceğinizi göreceğiz.
+Veri tipi tanımınıza `deriving (Show)`'u eklediğinizde, Haskell sizin için bir `show` fonksiyonu yaratır. (*(deriving)* İngilizce'de türeme demektir.) Yakında kendi `show` fonksiyonunuzu nasıl kullanabileceğinizi göreceğiz.
 
 ```haskell
 convertList [] = Nil
@@ -1870,7 +1870,7 @@ askUser = do
           Nothing -> askUser
 ```
 
-Fonksiyonumuzun tipi `IO [Integer]`. Bu demek oluyor ki belirli IO aksiyonları sonucu `[Integer]` tıpınde bir değer elde ediyoruz. Bazıları bunu şöyle açıklıyor:
+Fonksiyonumuzun tipi `IO [Integer]`. Bu demek oluyor ki belirli IO aksiyonları sonucu `[Integer]` tipinde bir değer elde ediyoruz. Bazıları bunu şöyle açıklıyor:
 
 > «IO içinde [Integer] var.»
 
@@ -1887,9 +1887,9 @@ main = do
 
 IO'ya girişimizi bitirdik. Biraz hızlıydı, değil mi? Hatırlamamız gereken temel şeyler sunlar:
 
-* `do` bloğunun içinde, her ifade `IO a` tıpınde olmalı. Bu sizi belli ifadelerle kısıtlıyor. Örneğin, `getLine`, `print`, `putStrLn`, vs.
+* `do` bloğunun içinde, her ifade `IO a` tipinde olmalı. Bu sizi belli ifadelerle kısıtlıyor. Örneğin, `getLine`, `print`, `putStrLn`, vs.
 * Saf fonksiyonları olabildiğince saf olmayan kısımların dışında tutmaya çalışın, işin mümkün olduğunca büyük kısmını saf fonksiyonlara yaptırın.
-* `IO a`, `a` tıpınde bir eleman döndüren IO aksiyonu demektir. `IO` aksiyonu temsil eder, `IO a` aslında bir fonksiyonun tipidir. Daha fazlasını merak ediyorsanız sonraki bölümü okuyun.
+* `IO a`, `a` tipinde bir eleman döndüren IO aksiyonu demektir. `IO` aksiyonu temsil eder, `IO a` aslında bir fonksiyonun tipidir. Daha fazlasını merak ediyorsanız sonraki bölümü okuyun.
 
 Biraz çalışırsanız, `IO` kullanabiliyor olmalısınız.
 
