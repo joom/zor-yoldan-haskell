@@ -23,19 +23,19 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
     * [Fonksiyonel Stil](#31-fonksiyonel-stil)
         * [Üst Derece Fonksiyonlar](#311-%C3%9Cst-derece-fonksiyonlar)
     * [Tipler](#32-tipler)
-        * Tip Çıkarımı
-        * Tip Oluşturma
+        * [Tip Çıkarımı](#321-tip-%C3%87%C4%B1kar%C4%B1m%C4%B1)
+        * [Tip Oluşturma](#322-tip-olu%C5%9Fturma)
         * Özyinelemeli Tipler *(Recursive types)*
         * Ağaçlar
     * Sonsuz Yapılar
 * Çok Zor Kısım
-* IO ile Baş Etmek
-* IO Hileleri
-* Monad
-    * Maybe Monad'ı
-    * Liste Monad'ı
+    * IO ile Baş Etmek
+    * IO Hileleri
+    * Monad
+        * Maybe Monad'ı
+        * Liste Monad'ı
 * Ek
-* Sonsuz Ağaçlar Hakkında
+    * Sonsuz Ağaçlar Hakkında
 
 ***
 
