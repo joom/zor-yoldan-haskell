@@ -1248,7 +1248,7 @@ data List a = Nil | a ::: (List a)
               deriving (Show,Read,Eq,Ord)
 ```
 
-Veri tipi tanımınıza `deriving (Show)`'u eklediğinizde, Haskell sizin için bir `show` fonksiyonu yaratır. Yakında kendi `show` fonksiyonunuzu nasıl kullanabileceğinizi göreceğiz.
+Veri tıpı tanımınıza `deriving (Show)`'u eklediğinizde, Haskell sizin için bir `show` fonksiyonu yaratır. (*(deriving)* İngilizce'de türeme demektir.) Yakında kendi `show` fonksiyonunuzu nasıl kullanabileceğinizi göreceğiz.
 
 ```haskell
 convertList [] = Nil
@@ -1276,7 +1276,392 @@ Bu şu çıktıyı verir:
 
 ![Trees](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/magritte-l-arbre.jpg)
 
+Başka bir standart örnek verelim: ikili ağaçlar.
 
+```haskell
+import Data.List
+
+data BinTree a = Empty
+                 | Node a (BinTree a) (BinTree a)
+                              deriving (Show)
+```
+
+Şimdi de bir listeyi sıralı bir ikili ağaca dönüştüren bir fonksiyon yazalım:
+
+```haskell
+treeFromList :: (Ord a) => [a] -> BinTree a
+treeFromList [] = Empty
+treeFromList (x:xs) = Node x (treeFromList (filter (<x) xs))
+                             (treeFromList (filter (>x) xs))
+```
+
+Fonksiyonun ne kadar okunaklı olduğunu görebiliyor musunuz? Düz Türkçe olarak yazarsak:
+* boş liste, boş ağaca çevrilir.
+* bir liste `(x:xs)`, bir ağaca çevrilir ki,
+    * kok `x`'tır.
+    * sol alt ağaç, `xs`'in `x`'ten kesin olarak küçük elemanlarından oluşturulur.
+    * sağ alt ağaç, `xs`'in `x`'ten kesin olarak büyük elemanlarından oluşturulur.
+
+```haskell
+main = print $ treeFromList [7,2,4,8]
+```
+
+Şu sonucu alıyor olmalısınız:
+
+```haskell
+Node 7 (Node 2 Empty (Node 4 Empty Empty)) (Node 8 Empty Empty)
+```
+
+Bu ağacımızın düzgün ama zor anlaşılır bir temsili notasyonu.
+
+[02_Hard_Part/30_Trees.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/30_Trees.lhs)
+
+***
+
+[02_Hard_Part/31_Trees.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/31_Trees.lhs)
+
+Öylesine, ağacımız için daha iyi bir gösterim kodu yazalım. Ben genel olarak ağaçları daha iyi göstermek için bir fonksiyon yazarken eğlendim, eğer bu kısmı takip etmeyi zor buluyorsanız atlayabilirsiniz, bir sorun olmaz.
+
+Değiştirmemiz gereken bazı şeyler var. `BinTree` tipımizden `deriving (Show)` kısmını kaldırıyoruz. Ayrıca, BinTree tipimizi (`Eq` ve `Ord`)'un sınıflarından türetmek de eşitlik ve karşılaştırma testleri yapmamızı sağlayacaktır.
+
+```haskell
+data BinTree a = Empty
+                 | Node a (BinTree a) (BinTree a)
+                  deriving (Eq,Ord)
+```
+
+`deriving (Show)` kısmı olmadan Haskell sizin için bir `show` metodu yaratmaz. Biz `show` metodu için kendi versiyonumuzu yazacağız. Bunu başarmak için, yeni yarattığımız `BinTree a`'nin `Show` tip sınıfının bir üyesi olduğunu belirtmemiz gerekiyor. Bunun için genel söz dizimi şöyle:
+
+```haskell
+instance Show (BinTree a) where
+   show t = ... -- burada kendi fonksiyonunuzu tanimliyorsunuz
+```
+
+Benim bir ikili ağacı göstermek için yazdığım versiyon aşağıda. Karmaşıkmış gibi görünüyor ama endişelenmeyin. Daha garip nesneleri de göstermesi için bazı iyileştirmeler yaptım.
+
+```haskell
+-- BinTree'a nin Show tip sinifina uye oldugunu belirtin
+instance (Show a) => Show (BinTree a) where
+  -- kokten once bir '<' ile baslayacagiz
+  -- satir basina da : koyacagiz
+  show t = "< " ++ replace '\n' "\n: " (treeshow "" t)
+    where
+    -- treeshow pref Tree
+    --   bu fonksiyon her satira pref ile baslayarak bir agaci gosterecek
+    -- Bos agaci gostermeyecek
+    treeshow pref Empty = ""
+    -- Yaprak
+    treeshow pref (Node x Empty Empty) =
+                  (pshow pref x)
+
+    -- Sag alt agac bos
+    treeshow pref (Node x left Empty) =
+                  (pshow pref x) ++ "\n" ++
+                  (showSon pref "`--" "   " left)
+
+    -- Sol alt agac bos
+    treeshow pref (Node x Empty right) =
+                  (pshow pref x) ++ "\n" ++
+                  (showSon pref "`--" "   " right)
+
+    -- Sol ve sag alt agaclari bos olmayan agac
+    treeshow pref (Node x left right) =
+                  (pshow pref x) ++ "\n" ++
+                  (showSon pref "|--" "|  " left) ++ "\n" ++
+                  (showSon pref "`--" "   " right)
+
+    -- Agaci guzel gostermek icin on ekler kullan
+    showSon pref before next t =
+                  pref ++ before ++ treeshow (pref ++ next) t
+
+    -- pshow "\n"'i' "\n"++pref ile degistiriyor
+    pshow pref x = replace '\n' ("\n"++pref) (show x)
+
+    -- bir karakteri diger karakter dizisi ile degistiriyor
+    replace c new string =
+      concatMap (change c new) string
+      where
+          change c new x
+              | x == c = new
+              | otherwise = x:[] -- "x"
+```
+
+`treeFromList` metodu tamamen aynı kalıyor.
+
+Şimdi, görelim nasıl oluyormuş:
+
+```haskell
+main = do
+  putStrLn "Tam sayi ikili agaci:"
+  print $ treeFromList [7,2,4,8,1,3,6,21,12,23]
+```
+
+```
+Tam sayi ikili agaci:
+< 7
+: |--2
+: |  |--1
+: |  `--4
+: |     |--3
+: |     `--6
+: `--8
+:    `--21
+:       |--12
+:       `--23
+```
+
+Çok daha iyi, değil mi? Ağacın kökü `<` karakteriyle başlayan satırda gösteriliyor. Takip eden her satır `:` işareti ile başlıyor. Ağacımızda başka tiplerde veri de kullanabilirdik.
+
+```haskell
+  putStrLn "\nKarakter dizisi ikili agaci:"
+  print $ treeFromList ["foo","bar","baz","gor","yog"]
+```
+
+```
+Karakter dizisi ikili agaci:
+< "foo"
+: |--"bar"
+: |  `--"baz"
+: `--"gor"
+:    `--"yog"
+```
+
+Ağaçların eşitliğini ve büyük/küçüklüğünü test edebildiğimiz için, ağaçlardan ağaç da yapabiliriz!
+
+```haskell
+  putStrLn "\nKarakter ikili agaclarinin ikili agaci:"
+  print ( treeFromList
+           (map treeFromList ["baz","zara","bar"]))
+```
+
+```
+Karakter ikili agaclarinin ikili agaci:
+< < 'b'
+: : |--'a'
+: : `--'z'
+: |--< 'b'
+: |  : |--'a'
+: |  : `--'r'
+: `--< 'z'
+:    : `--'a'
+:    :    `--'r'
+```
+
+Ağacın her satırını bu yüzden `:` ile başlatmıştım. (kök hariç)
+
+![Yo](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/yo_dawg_tree.jpg)
+
+```haskell
+  putStrLn "\nKarakter ikili agaclarinin ikili agaci:"
+  print $ (treeFromList . map (treeFromList . map treeFromList))
+             [ ["YO","DAWG"]
+             , ["I","HEARD"]
+             , ["I","HEARD"]
+             , ["YOU","LIKE","TREES"] ]
+```
+
+ki bu da şuna denk:
+
+```haskell
+print ( treeFromList (
+          map treeFromList
+             [ map treeFromList ["YO","DAWG"]
+             , map treeFromList ["I","HEARD"]
+             , map treeFromList ["I","HEARD"]
+             , map treeFromList ["YOU","LIKE","TREES"] ]))
+```
+
+ve şu çıktıyı vermeli:
+
+```
+Karakter ikili agaclarinin ikili agaci:
+< < < 'Y'
+: : : `--'O'
+: : `--< 'D'
+: :    : |--'A'
+: :    : `--'W'
+: :    :    `--'G'
+: |--< < 'I'
+: |  : `--< 'H'
+: |  :    : |--'E'
+: |  :    : |  `--'A'
+: |  :    : |     `--'D'
+: |  :    : `--'R'
+: `--< < 'Y'
+:    : : `--'O'
+:    : :    `--'U'
+:    : `--< 'L'
+:    :    : `--'I'
+:    :    :    |--'E'
+:    :    :    `--'K'
+:    :    `--< 'T'
+:    :       : `--'R'
+:    :       :    |--'E'
+:    :       :    `--'S'
+```
+
+Tekrar edilen ağaçların eklenmediğine dikkat edin; `"I","HEARD"`'e denk gelen sadece bir ağaç var. Bunun için (neredeyse) hiçbir şey yapmadık, çünkü Tree yapısını `Eq` tip sınıfından türettik.
+
+Bu yapının ne kadar müthiş olduğunu görebiliyor musunuz: Sadece sayılardan, karakter dizilerinden, karakterlerden değil, başka ağaçlardan da ağaçlar yapabiliyoruz. İstersek ağaçlardan oluşan ağaçlardan oluşan ağaç bile yapabiliriz!
+
+[02_Hard_Part/31_Trees.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/31_Trees.lhs)
+
+***
+
+[02_Hard_Part/40_Infinites_Structures.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/40_Infinites_Structures.lhs)
+
+## 3.3. Sonsuz Yapılar
+
+![Infinite](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/escher_infinite_lizards.jpg)
+
+Haskell'in *tembel* olduğu sıkça söylenir.
+
+Aslında, eğer biraz titizseniz, Haskell'in [*non-strict*](http://www.haskell.org/haskellwiki/Lazy_vs._non-strict) (aceleci olmayan, kesin olmayan) olduğunu söylemelisiniz. Tembellik sadece *non-strict* dillerin ortak bir tatbikidir.
+
+Öyleyse "non-strict" tam olarak ne anlama geliyor? Haskell vikisiden alıntılayalım:
+
+> Sadeleştirme (hesaplama için matematiksel terim) dıştan içe doğru ilerler.
+>
+> yani eğer `(a+(b*c))`'yi ele alıyorsanız, önce `+`'yi sadeleştirirsiniz, sonra iç `(b*c)`'yi sadeleştirirsiniz.
+
+Örneğin Haskell'de şunu yapabilirsiniz:
+
+```haskell
+-- numbers = [1,2,..]
+numbers :: [Integer]
+numbers = 0:map (1+) numbers
+
+take' n [] = []
+take' 0 l = []
+take' n (x:xs) = x:take' (n-1) xs
+
+main = print $ take' 10 numbers
+```
+
+Sonra duruyor.
+
+Neden?
+
+`numbers` değişkeninin tamamını hesaplamak yerine, sadece ihtiyacı olan elemanları, ihtiyacı olduğu zaman hesaplıyor.
+
+Ayrıca, Haskell'de sonsuz listeler için bir notasyon olduğunu da söylemiş olayım:
+
+```haskell
+[1..]   ⇔ [1,2,3,4...]
+[1,3..] ⇔ [1,3,5,7,9,11...]
+```
+
+ve çoğu fonksiyon da onlarla çalışır. Ayrıca, Haskell'de, bizim `take'` fonksiyonumuza denk bir `take` fonksiyonu mevcuttur.
+
+[02_Hard_Part/40_Infinites_Structures.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/40_Infinites_Structures.lhs)
+
+***
+
+[02_Hard_Part/41_Infinites_Structures.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/41_Infinites_Structures.lhs)
+
+Sıralı ikili ağaç yaptığımızı varsayalım. Sonsuz bir ikili ağaç şöyle olur:
+
+```haskell
+nullTree = Node 0 nullTree nullTree
+```
+
+Her düğümün 0'a eşit olduğu, geçerli ve tam bir ikili ağaç. Şimdi bu objeyi aşağıdaki fonksiyonla işleyebileceğimi kanıtlayacağım:
+
+```haskell
+-- bir BinTree'nin tum elemanlarini
+-- belli bir derinlige kadar al
+treeTakeDepth _ Empty = Empty
+treeTakeDepth 0 _     = Empty
+treeTakeDepth n (Node x left right) = let
+          nl = treeTakeDepth (n-1) left
+          nr = treeTakeDepth (n-1) right
+          in
+              Node x nl nr
+```
+
+Bu programın sonucunu görelim.
+
+```haskell
+main = print $ treeTakeDepth 4 nullTree
+```
+
+Kodumuz derleniyor, çalışıyor ve şu sonucu vererek duruyor:
+
+```
+<  0
+: |-- 0
+: |  |-- 0
+: |  |  |-- 0
+: |  |  `-- 0
+: |  `-- 0
+: |     |-- 0
+: |     `-- 0
+: `-- 0
+:    |-- 0
+:    |  |-- 0
+:    |  `-- 0
+:    `-- 0
+:       |-- 0
+:       `-- 0
+```
+
+Nöronlarınızı biraz daha ısındırmak için daha ilginç bir ağaca bakalım:
+
+```haskell
+iTree = Node 0 (dec iTree) (inc iTree)
+        where
+           dec (Node x l r) = Node (x-1) (dec l) (dec r) 
+           inc (Node x l r) = Node (x+1) (inc l) (inc r) 
+```
+
+Bu ağacı oluşturmanın başka bir yolu da üst derece fonksiyonları kullanmaktır. Bu fonksiyon `map` fonksiyonuna benziyor, ama listeler yerine `BinTree`'ler üzerinde çalışıyor. Ortaya şöyle bir fonksiyon çıkacak:
+
+```haskell
+-- bir fonksiyonu agacin her dugumune uygular
+treeMap :: (a -> b) -> BinTree a -> BinTree b
+treeMap f Empty = Empty
+treeMap f (Node x left right) = Node (f x) 
+                                     (treeMap f left) 
+                                     (treeMap f right)
+```
+
+*Not:* Bunun hakkında burada daha fazla konuşmayacağım. Eğer `map`'in diğer veri yapılarına genellemesiyle ilgileniyorsanız, *functor*ları ve `fmap`'i araştırın.
+
+Şimdi tanımımız şöyle oldu:
+
+```haskell
+infTreeTwo :: BinTree Int
+infTreeTwo = Node 0 (treeMap (\x -> x-1) infTreeTwo) 
+                    (treeMap (\x -> x+1) infTreeTwo) 
+```
+
+Şunun sonucuna bakalım:
+
+```haskell
+main = print $ treeTakeDepth 4 infTreeTwo
+```
+
+```
+<  0
+: |-- -1
+: |  |-- -2
+: |  |  |-- -3
+: |  |  `-- -1
+: |  `-- 0
+: |     |-- -1
+: |     `-- 1
+: `-- 1
+:    |-- 0
+:    |  |-- -1
+:    |  `-- 1
+:    `-- 2
+:       |-- 1
+:       `-- 3
+```
+
+[02_Hard_Part/41_Infinites_Structures.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/41_Infinites_Structures.lhs)
+
+# 4. Çok Zor Kısım
 
 
 
