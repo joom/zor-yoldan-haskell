@@ -1126,6 +1126,108 @@ Tip çıkarımı Haskell'de dinamik tip sistemli dillerin yarattığı özgürl�
 
 ### 3.2.2. Tip Oluşturma
 
+Kendi tiplerinizi oluşturabilirsiniz. İlk önce takma adlarla, yani tip eşanlamlılarıyla başlayalım. 
+
+```haskell
+type Name   = String
+type Color  = String
+
+showInfos :: Name ->  Color -> String
+showInfos name color =  "Isim: " ++ name
+                        ++ ", Renk: " ++ color
+name :: Name
+name = "Ahmet"
+color :: Color
+color = "Mavi"
+main = putStrLn $ showInfos name color
+```
+
+[02_Hard_Part/21_Types.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/21_Types.lhs)
+
+***
+
+[02_Hard_Part/22_Types.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/22_Types.lhs)
+
+Ancak bu çok fazla koruma yaratmıyor. `showInfos` fonksiyonuna verdiğiniz parametrelerin yerini değiştirip çalıştırmayı deneyin:
+```
+putStrLn $ showInfos color name
+```
+
+Derlenecek ve çalışacak. Aslında, `Name`, `Color` ve `String` tıplerini birbiriyle değiştirebilirsiniz, bir fark yaratmayacak. Derleyici hepsine aynıymış gibi muamele edecek.
+
+Diğer bir yöntem de `data` anahtar kelimesini kullanarak kendi tiplerinizi yaratmak.
+
+```haskell
+data Name   = NameConstr String --NameConstr : isim yapicisi
+data Color  = ColorConstr String --ColorConstr : renk yapicisi
+
+showInfos :: Name ->  Color -> String
+showInfos (NameConstr name) (ColorConstr color) =
+      "Name: " ++ name ++ ", Color: " ++ color
+
+name  = NameConstr "Ahmet"
+color = ColorConstr "Mavi"
+main = putStrLn $ showInfos name color
+```
+
+Ama şimdi `showInfos` için parametrelerin yerlerini değiştirirseniz, derleyici hata verecek! Yani bu bir daha yapmayacağınız muhtemel bir hata, ve kaçınmak için tek yapmanız gereken biraz daha uzun yazmak.
+
+Yapıcıların da birer fonksiyon olduğuna dikkat edin:
+
+```haskell
+NameConstr  :: String -> Name
+ColorConstr :: String -> Color
+```
+
+`data` anahtar kelimesinin genel söz dizimi de şöyledir:
+
+```haskell
+data TipAdi =   YapiciAdi  [tipler]
+                | YapiciAdi2 [tipler]
+                | ...
+```
+
+Genel kullanım tip adının ve yapıcı adının aynı olması yönündedir.
+
+Örnek:
+
+```haskell
+data Complex = Num a => Complex a a
+```
+
+Kayıt *(record)* söz dizimini de kullanabilirsiniz:
+
+```haskell
+data VeriTipiAdi = VeriYapicisi {
+                      alan_1 :: [alan_1 tipi]
+                    , alan_2 :: [alan_2 tipi]
+                    ...
+                    , alan_n :: [alan_n tipi] }
+```
+
+Daha da iyisi, alanlara erişim sağlayan fonksiyonlar sizin için oluşturuluyor. Ayrıca bu tipte bir veri oluştururken alanların sırasını da kullanabilirsiniz.
+
+Örnek:
+
+```haskell
+data Complex = Num a => Complex { real :: a, img :: a}
+c = Complex 1.0 2.0
+z = Complex { real = 3, img = 4 }
+real c ⇒ 1.0
+img z ⇒ 4
+```
+
+[02_Hard_Part/22_Types.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/22_Types.lhs)
+
+***
+
+[02_Hard_Part/23_Types.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/23_Types.lhs)
+
+### 3.2.3. Özyinelemeli Tipler *(Recursive types)*
+
+
+
+
 
 ***
 
