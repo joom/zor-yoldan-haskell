@@ -25,10 +25,10 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
     * [Tipler](#32-tipler)
         * [Tip Çıkarımı](#321-tip-%C3%87%C4%B1kar%C4%B1m%C4%B1)
         * [Tip Oluşturma](#322-tip-olu%C5%9Fturma)
-        * Özyinelemeli Tipler *(Recursive types)*
-        * Ağaçlar
-    * Sonsuz Yapılar
-* Çok Zor Kısım
+        * [Özyinelemeli Tipler *(Recursive types)*](#323-%C3%96zyinelemeli-tipler-recursive-types)
+        * [Ağaçlar](#324-a%C4%9Fa%C3%A7lar)
+    * [Sonsuz Yapılar](#33-sonsuz-yap%C4%B1lar)
+* [Çok Zor Kısım](#4-%C3%87ok-zor-k%C4%B1s%C4%B1m)
     * IO ile Baş Etmek
     * IO Hileleri
     * Monad
