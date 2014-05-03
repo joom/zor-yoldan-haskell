@@ -10,24 +10,24 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
         * [Fonksiyon tanımı](#131-fonksiyon-tan%C4%B1m%C4%B1)
         * [Tip örneği](#132-tip-%C3%B6rne%C4%9Fi)
 * [Temel Haskell](#2-temel-haskell)
-    * Notasyon
-        * Aritmetik
-        * Mantıksal
-        * Üslü Sayılar
-        * Listeler
-        * Karakter Dizileri
-        * Demetler *(Tuple)*
-        * Parantezlerle Baş Etmek
-    * Fonksiyonlar için Faydalı Notasyonlar
-* Zor Kısım
-* Fonksiyonel Stil
-    * Üst Derece Fonksiyonlar
-* Tipler
-    * Tip Çıkarımı
-    * Tip İnşası
-    * Özyinelemeli Tipler *(Recursive types)*
-    * Ağaçlar
-* Sonsuz Yapılar
+    * [Notasyon](#21-notasyon)
+        * [Aritmetik](#aritmetik)
+        * [Mantıksal](#mant%C4%B1ksal)
+        * [Üslü Sayılar](#%C3%9Csl%C3%BC-say%C4%B1lar)
+        * [Listeler](#listeler)
+        * [Karakter Dizileri](#karakter-dizileri)
+        * [Demetler *(Tuple)*](#demetler-tuple)
+        * [Parantezlerle Baş Etmek](#parantezlerle-ba%C5%9Fa-%C3%87%C4%B1kmak)
+    * [Fonksiyonlar için Faydalı Notasyonlar](#22-fonksiyonlar-i%C3%A7in-faydal%C4%B1-notasyonlar)
+* [Zor Kısım](#3-zor-k%C4%B1s%C4%B1m)
+    * [Fonksiyonel Stil](#31-fonksiyonel-stil)
+        * Üst Derece Fonksiyonlar
+    * Tipler
+        * Tip Çıkarımı
+        * Tip İnşası
+        * Özyinelemeli Tipler *(Recursive types)*
+        * Ağaçlar
+    * Sonsuz Yapılar
 * Çok Zor Kısım
 * IO ile Baş Etmek
 * IO Hileleri
@@ -580,7 +580,7 @@ absolute' x
 
 # 3. Zor Kısım
 
-Zor kısım şimdi başlayabilir.
+Zor kısım şimdi başlıyor.
 
 ## 3.1. Fonksiyonel Stil
 
