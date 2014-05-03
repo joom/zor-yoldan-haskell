@@ -1225,6 +1225,58 @@ img z ⇒ 4
 
 ### 3.2.3. Özyinelemeli Tipler *(Recursive types)*
 
+Daha önce özyinelemeli bir tiple karşılaşmıştık: listeler. Liste tipini -biraz daha uzun bir söz dizimiyle de olsa- kendimiz de oluşturabiliriz:
+
+```haskell
+data List a = Empty | Cons a (List a)
+```
+
+Eğer daha kolay bir söz dizimi yaratmak istiyorsanız, yapıcılar için iç notasyon *(infix)* tanımlayabilirsiniz.
+
+```haskell
+infixr 5 :::
+data List a = Nil | a ::: (List a)
+```
+
+`infixr`'dan sonraki sayı önceliği belirtiyor.
+
+Eğer bu veri tipini ekrana yazdırmak (`Show`), karakter dizisinden çevirmek (`Read`), eşitliğini test etmek (`Eq`) ve karşılaştırmak (`Ord`) istiyorsanız, Haskell'e sizin için gerekli fonksiyonları oluşturmasını söyleyebilirsiniz.
+
+```haskell
+infixr 5 :::
+data List a = Nil | a ::: (List a) 
+              deriving (Show,Read,Eq,Ord)
+```
+
+Veri tipi tanımınıza `deriving (Show)`'u eklediğinizde, Haskell sizin için bir `show` fonksiyonu yaratır. Yakında kendi `show` fonksiyonunuzu nasıl kullanabileceğinizi göreceğiz.
+
+```haskell
+convertList [] = Nil
+convertList (x:xs) = x ::: convertList xs
+
+main = do
+      print (0 ::: 1 ::: Nil)
+      print (convertList [0,1])
+```
+
+Bu şu çıktıyı verir:
+
+```
+0 ::: (1 ::: Nil)
+0 ::: (1 ::: Nil)
+```
+
+[02_Hard_Part/23_Types.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/23_Types.lhs)
+
+***
+
+[02_Hard_Part/30_Trees.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/30_Trees.lhs)
+
+### 3.2.4. Ağaçlar
+
+![Trees](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/magritte-l-arbre.jpg)
+
+
 
 
 
