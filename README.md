@@ -21,8 +21,8 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
     * [Fonksiyonlar için Faydalı Notasyonlar](#22-fonksiyonlar-i%C3%A7in-faydal%C4%B1-notasyonlar)
 * [Zor Kısım](#3-zor-k%C4%B1s%C4%B1m)
     * [Fonksiyonel Stil](#31-fonksiyonel-stil)
-        * Üst Derece Fonksiyonlar
-    * Tipler
+        * [Üst Derece Fonksiyonlar](#311-%C3%9Cst-derece-fonksiyonlar)
+    * [Tipler](#32-tipler)
         * Tip Çıkarımı
         * Tip İnşası
         * Özyinelemeli Tipler *(Recursive types)*
@@ -844,7 +844,7 @@ evenSum = accumSum 0
 
 [02_Hard_Part/15_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/15_Functions.lhs)
 
-## 3.1.1. Üst Derece Fonksiyonlar
+### 3.1.1. Üst Derece Fonksiyonlar
 
 ![Higher Order](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/escher_polygon.png)
 
@@ -1029,6 +1029,10 @@ Bu Haskell süper gücüyle ilgili konuşmadan önce, Haskell'in başka bir teme
 
 ## 3.2. Tipler
 
+![Types](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/salvador-dali-the-madonna-of-port-lligat.jpg)
+
+> TL, DR (Çok uzundu okumadım):
+>
 
 
 
