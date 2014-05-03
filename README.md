@@ -24,7 +24,7 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
         * [Üst Derece Fonksiyonlar](#311-%C3%9Cst-derece-fonksiyonlar)
     * [Tipler](#32-tipler)
         * Tip Çıkarımı
-        * Tip İnşası
+        * Tip Oluşturma
         * Özyinelemeli Tipler *(Recursive types)*
         * Ağaçlar
     * Sonsuz Yapılar
@@ -1032,8 +1032,99 @@ Bu Haskell süper gücüyle ilgili konuşmadan önce, Haskell'in başka bir teme
 ![Types](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/salvador-dali-the-madonna-of-port-lligat.jpg)
 
 > TL, DR (Çok uzundu okumadım):
->
+> * `type Ad = BaskaTip` sadece bir takma addir ve derleyici `Ad` ve `BaskaTip` arasında bir fark gözetmez.
+> * `data Ad = AdYapısı BaskaTip` yapısında fark vardır.
+> * `data` anahtar kelimesi özyinelemeli yapılar yaratabilir.
+> * `deriving` sihirlidir ve sizin için fonksiyonlar yaratır.
 
+Haskell'de tipler güçlü ve statiktir.
+
+Peki bu neden önemli? Çünkü bu, hatalardan kaçınmanıza *yüksek derecede* yardımcı olur. Haskell'de hataların çoğu henüz derleme aşamasında yakalanır. Bunun asıl sebebi de tip çıkarımının derleme sırasında yapılmasıdır. Örneğin tip çıkarımı nerede yanlış parametreyi yanlış yerde kullandığınızı yakalar.
+
+### 3.2.1. Tip Çıkarımı
+
+Statik tip sistemi hızlı çalıştırma için genelde önemlidir. Ama çoğu statik tip sistemli diller kavramları genellemede kötüdür. Haskell'in kurtarıcı lütfü, tıpleri kendi kendine *çıkarım* yaparak bulabilmesidir.
+
+Basit bir örnekle başlayalım, Haskell'deki `square` fonksiyonu:
+
+```haskell
+square x = x * x
+```
+
+`square` fonksiyonu Haskell'deki herhangi bir sayısal değerin karesini alabilir. `square` fonksiyonuna parametre olarak `Int`, `Integer`, `Float`, `Fractional`, hatta `Complex` tipinde veri bile verebilirsiniz. Örnekle kanıtlayalım:
+
+```
+% ghci
+GHCi, version 7.0.4:
+...
+Prelude> let square x = x*x
+Prelude> square 2
+4
+Prelude> square 2.1
+4.41
+Prelude> -- load the Data.Complex module
+Prelude> :m Data.Complex
+Prelude Data.Complex> square (2 :+ 1)
+3.0 :+ 4.0
+```
+
+`x :+ y` kompleks sayıların gösteriminde kullanılır. (x + iy)
+
+Şimdi C'deki gerekli kod miktarıyla karşılaştıralım:
+
+```c
+int     int_square(int x) { return x*x; }
+
+float   float_square(float x) {return x*x; }
+
+complex complex_square (complex z) {
+    complex tmp;
+    tmp.real = z.real * z.real - z.img * z.img;
+    tmp.img = 2 * z.img * z.real;
+}
+
+complex x,y;
+y = complex_square(x);
+```
+
+C'de her tip için yeni bir fonksiyon yazmanız gerekiyor. Bunu aşmanın tek yolu ön-işlemciyi kullanarak üst-programlama hilelerine başvurmak. C++'ta daha iyi bir yol var, C++ şablonları:
+
+```cpp
+#include <iostream>
+#include <complex>
+using namespace std;
+
+template<typename T>
+T square(T x)
+{
+    return x*x;
+}
+
+int main() {
+    // int
+    int sqr_of_five = square(5);
+    cout << sqr_of_five << endl;
+    // double
+    cout << (double)square(5.3) << endl;
+    // complex
+    cout << square( complex<double>(5,3) )
+         << endl;
+    return 0;
+}
+```
+
+C++ bu yönden C'den çok daha iyi iş çıkartıyor. Ama daha karmaşık fonksiyonlar için söz dizimini takip etmek biraz daha zor olabilir: örnek için [bu makaleye](http://bartoszmilewski.com/2009/10/21/what-does-haskell-have-to-do-with-c/) bakabilirsiniz.
+
+C++'ta bir fonksiyonun farklı tiplerle çalışması için ayrıca belirtmelisiniz. Haskell'de durum tam tersi. Fonksiyon varsayılan olarak olabildiğince genel tanımlanır.
+
+Tip çıkarımı Haskell'de dinamik tip sistemli dillerin yarattığı özgürlük hissini yaratır. Ama dinamik tip sistemli dillerden farklı olarak çoğu hata çalışma zamanından önce yakalanır. Genelde Haskell kodu
+> derleniyorsa, mutlaka kastettiğiniz şeyi yapıyordur.
+
+***
+
+[02_Hard_Part/21_Types.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/21_Types.lhs)
+
+### 3.2.2. Tip Oluşturma
 
 
 ***
