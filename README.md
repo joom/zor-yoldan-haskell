@@ -1663,8 +1663,241 @@ main = print $ treeTakeDepth 4 infTreeTwo
 
 # 4. Çok Zor Kısım
 
+Buraya kadar geldiyseniz tebrikler! Şimdi gerçekten çok zor kısım başlayabilir.
 
+Eğer benim gibiyseniz, fonksiyonel stili anlamış olmalısınız. Ayrıca tembelliğin varsayılan olmasının avantajlarını da biraz anlamış olmalısınız. Ama gerçek bir program yapmaya nereden başlamanız gerektiğini bilmiyorsunuz. Özellikle de şu soruların cevaplarını:
+* Yan etkilerle nasıl bas edilir?
+* Neden IO (girdi-çıktı) ile baş etmek için imperatifliğe benzer bir notasyon var?
 
+Karmaşık cevaplara hazır olun. Ama hepsi sonunda çok faydalı.
+
+***
+
+[03_Hell/01_IO/01_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/01_progressive_io_example.lhs)
+
+## 4.1. IO ile Baş Etmek
+
+![IO](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/magritte_carte_blanche.jpg)
+
+> TL;DR: (Çok uzundu okumadım)
+
+> IO ile uğraşan tipik bir fonksiyon imperatif bir programa çok benzer:
+
+```haskell
+f :: IO a
+f = do
+  x <- action1
+  action2 x
+  y <- action3
+  action4 x y
+```
+
+> * Bir nesnenin değerini belirtmek için `<-` kullanıyoruz.
+> * Her satırın tipi `IO *`, bu örnekte:
+   * `action1 :: IO b`
+   * `action2 x :: IO ()`
+   * `action3 :: IO c`
+   * `action4 x y :: IO a`
+   * `x :: b, y :: c`
+   * Az sayıda nesnenin tipi `IO a`'dir, bu seçmenize yardım eder. Farklı olarak, burada saf fonksiyonları doğrudan kullanamazsınız. Saf fonksiyonları kullanmak için örneğin `action2 (saffonksiyon x)` yazabilirsiniz.
+
+Bu bölümde size IO kullanmayı anlatacağım, ama nasıl çalıştığını değil. Haskell'in nasıl saf ve saf olmayan kısımları ayırdığını göreceksiniz.
+
+Söz dizimindeki detayları anlamaya çalışmak için durmayın. Cevaplar ilerleyen bölümde gelecek.
+
+Ne yapalım?
+
+> Kullanıcıdan bir sayı listesi girmesini isteyin. Sayıların toplamını ekrana yazdırın.
+
+```haskell
+toList :: String -> [Integer]
+toList input = read ("[" ++ input ++ "]")
+
+main = do
+  putStrLn "Bir sayi listesi girin (virgulle ayirin):"
+  input <- getLine
+  print $ sum (toList input)
+```
+
+Bu programın ne yaptığı oldukça açık olmalı. Tiplere biraz daha ayrıntılı bakalım.
+
+```
+putStrLn :: String -> IO ()
+getLine  :: IO String
+print    :: Show a => a -> IO ()
+```
+
+Daha da ilginç şekilde, `do` bloğunun içindeki her ifadenin `IO a` tipinde olduğuna dikkat edelim.
+
+```haskell
+main = do
+  putStrLn "Enter ... " :: İÖ ()
+  getLine               :: İÖ String
+  print Something       :: İÖ ()
+```
+
+Ayrıca `<-` işaretinin etkisine de dikkat edelim.
+
+```
+do
+ x <- something -- bir seyler  
+```
+
+Eğer `something :: IO a` tipinde ise `x :: a`'dir.
+
+`IO` kullanımıyla ilgili başka bir önemli nokta da şudur: `do` bloğunun içindeki tüm satırlar şu iki şekilden birinde olmalı:
+
+```haskell
+action1             :: IO a
+                    -- bu durumda, a = ()
+```
+
+veya
+
+```haskell
+deger <- action2    -- ki burada
+                    -- bar z t :: IO b
+                    -- deger   :: b
+```
+
+Bu iki çeşit komut aksiyonları sıralamanın iki farklı yolunu ifade ediyor. Bu cümlenin anlamı önümüzdeki bölümün sonunda netleşecek.
+
+[03_Hell/01_IO/01_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/01_progressive_io_example.lhs)
+
+***
+
+[03_Hell/01_IO/02_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/02_progressive_io_example.lhs)
+
+Simdi programimizin nasil davrandigina bakalim. Ornegin, eger kullanici garip bir sey girerse ne olacak? Deneyelim:
+
+```
+    % runghc 02_progressive_io_example.lhs
+    Enter a list of numbers (separated by comma):
+    foo
+    Prelude.read: no parse
+```
+
+Püf! Garip bir hata mesajından sonra programımız çöktü! İlk iyileştirmemiz daha anlaşılır bir hata mesajı vermek olsun.
+
+Bunu yapmak için önce bir şeylerin yanlış gittiğini tespit edebilmemiz gerekiyor. İşte bunu yapmanın bir yolu: `Maybe` (Türkçesi: belki) tipini kullanmak. Bu Haskell'de sık kullanılan bir tiptir.
+
+```haskell
+import Data.Maybe
+```
+
+Peki bu nedir ki? `Maybe` bir parametre alan bir tiptir. Tanımı da şudur:
+
+```haskell
+data Maybe a = Nothing | Just a
+```
+
+Bu bir değer okumaya veya yaratmaya çalışırken bir hata olduğunu ifade etmenin güzel bir yoludur. `maybeRead` fonksiyonu bunun iyi bir örneği. Bu `read`'e benzer bir fonksiyon, ama eğer bir şeyler yanlış giderse dönen değer `Nothing` olacak. Eğer bir değer okuyabilirse, dönen değer `Just <değer>` olacak. Bu fonksiyonu çok anlamaya çalışmayın; `read`'den daha alt seviye bir fonksiyon olan `reads`'i kullanıyorum.
+
+```haskell
+maybeRead :: Read a => String -> Maybe a
+maybeRead s = case reads s of
+                  [(x,"")]    -> Just x
+                  _           -> Nothing
+```
+
+Biraz daha okunaklı olması için, şu şekilde giden bir fonksiyon tanımlayalım: Eğer karakter dizisinin formatı yanlışsa, `Nothing` döndürülecek. Aksi halde, örneğin "1,2,3" için `Just [1,2,3]` döndürülecek.
+
+```haskell
+getListFromString :: String -> Maybe [Integer]
+getListFromString str = maybeRead $ "[" ++ str ++ "]"
+```
+
+Sonrasında tek yapmamız gereken dönen değeri ana fonksiyonumuzda test etmek.
+
+```haskell
+main :: IO ()
+main = do
+  putStrLn "Bir sayi listesi girin (virgulle ayirin):"
+  input <- getLine
+  let maybeList = getListFromString input in
+      case maybeList of
+          Just l  -> print (sum l)
+          Nothing -> error "Kotu format. Hoscakalin."
+```
+
+Hata durumunda, iyi sayılabilecek bir hata mesajı göstermiş olalım.
+
+`main` fonksiyonunun `do` bloğundaki her ifadenin tipinin `IO a` formatında olduğuna dikkat edin. Tek bilmediğiniz yapı `error`. Ama `error msg` de gerekli tipi alıyor. (burada `IO ()`).
+
+Bu programda fark etmeniz gereken şey tanımladığımız fonksiyonların tipleri. Yazdığımız fonksiyonlar arasında sadece bir tanesinin tipinde `IO` var: `main`. Bu demek oluyor ki `main` saf olmayan bir fonksiyon. Ama `main` içinde saf bir fonksiyon olan  `getListFromString` kullanılıyor. Yani sadece bakarak bile fonksiyonların saf olup olmadıklarını anlayabilirsiniz.
+
+Peki saflık neden önemlidir? Bir sürü avantajının ucu şunlar:
+
+* Saf kod hakkında mantık yürütmek saf olmayan kod hakkında mantık yürütmekten çok daha kolaydır.
+* Saflık sizi yan etkilerden ötürü kolayca test edemeyeceğiniz hatalardan korur.
+* Saf fonksiyonları herhangi bir sırayla veya eşzamanlı olarak hiçbir risk olmadan hesaplayabilirsiniz.
+
+İşte bu yüzden, olabildiğince fazla kodunuzu saf fonksiyonlarla yazmalısınız.
+
+[03_Hell/01_IO/02_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/02_progressive_io_example.lhs)
+
+***
+
+[03_Hell/01_IO/03_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/03_progressive_io_example.lhs)
+
+Sonraki adımımız kullanıcı geçerli bir cevap girene kadar tekrar tekrar sormak olsun.
+
+İlk bölümü aynen kullanabiliriz:
+
+```haskell
+import Data.Maybe
+
+maybeRead :: Read a => String -> Maybe a
+maybeRead s = case reads s of
+                  [(x,"")]    -> Just x
+                  _           -> Nothing
+getListFromString :: String -> Maybe [Integer]
+getListFromString str = maybeRead $ "[" ++ str ++ "]"
+```
+
+Şimdi kullanıcı doğru bir girdi yazana kadar tekrar soran bir fonksiyon yazalım:
+
+```
+askUser :: IO [Integer]
+askUser = do
+  putStrLn "Bir sayi listesi girin (virgulle ayirin):"
+  input <- getLine
+  let maybeList = getListFromString input in
+      case maybeList of
+          Just l  -> return l
+          Nothing -> askUser
+```
+
+Fonksiyonumuzun tipi `IO [Integer]`. Bu demek oluyor ki belirli IO aksiyonları sonucu `[Integer]` tıpınde bir değer elde ediyoruz. Bazıları bunu şöyle açıklıyor:
+
+> «IO içinde [Integer] var.»
+
+Eğer bunun arkasındaki detayları anlamak istiyorsanız, sonraki bölümü okumanız gerekecek. Ama eğer IO'yu sadece *kullanmak* istiyorsanız, biraz tekrar yapın ve tipler hakkında düşünmeniz gerektiğini hatırlayın.
+
+Son olarak, `main` fonksiyonumuz çok daha basit:
+
+```haskell
+main :: IO ()
+main = do
+  list <- askUser
+  print $ sum list
+```
+
+IO'ya girişimizi bitirdik. Biraz hızlıydı, değil mi? Hatırlamamız gereken temel şeyler sunlar:
+
+* `do` bloğunun içinde, her ifade `IO a` tıpınde olmalı. Bu sizi belli ifadelerle kısıtlıyor. Örneğin, `getLine`, `print`, `putStrLn`, vs.
+* Saf fonksiyonları olabildiğince saf olmayan kısımların dışında tutmaya çalışın, işin mümkün olduğunce büyük kısmını saf fonksiyonlara yaptırın.
+* `IO a`, `a` tıpınde bir eleman döndüren IO aksiyonu demektir. `IO` aksiyonu temsil eder, `IO a` aslında bir fonksiyonun tipidir. Daha fazlasını merak ediyorsanız sonraki bölümü okuyun.
+
+Biraz çalışırsanız, `IO` kullanabiliyor olmalısınız.
+
+> Alıştırma: Tüm argümanlarının toplamını alan bir program yazın. İpucu: `getArgs` fonksiyonunu kullanın.
+
+[03_Hell/01_IO/03_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/03_progressive_io_example.lhs)
+
+## 4.2. IO Hileleri
+
+![Bu bir pipo degildir](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/magritte_pipe.jpg)
 
 ***
 
