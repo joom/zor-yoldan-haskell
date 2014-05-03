@@ -1,6 +1,8 @@
+> This is the Turkish translation of Yann Esposito's article [Learn Haskell Fast and Hard](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/).
+
 # Zor Yoldan Haskell
 
-TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir rehber.
+> TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir rehber.
 
 #### İçindekiler:
 * [Giriş](#1-giri%C5%9F)
@@ -1886,7 +1888,7 @@ main = do
 IO'ya girişimizi bitirdik. Biraz hızlıydı, değil mi? Hatırlamamız gereken temel şeyler sunlar:
 
 * `do` bloğunun içinde, her ifade `IO a` tıpınde olmalı. Bu sizi belli ifadelerle kısıtlıyor. Örneğin, `getLine`, `print`, `putStrLn`, vs.
-* Saf fonksiyonları olabildiğince saf olmayan kısımların dışında tutmaya çalışın, işin mümkün olduğunce büyük kısmını saf fonksiyonlara yaptırın.
+* Saf fonksiyonları olabildiğince saf olmayan kısımların dışında tutmaya çalışın, işin mümkün olduğunca büyük kısmını saf fonksiyonlara yaptırın.
 * `IO a`, `a` tıpınde bir eleman döndüren IO aksiyonu demektir. `IO` aksiyonu temsil eder, `IO a` aslında bir fonksiyonun tipidir. Daha fazlasını merak ediyorsanız sonraki bölümü okuyun.
 
 Biraz çalışırsanız, `IO` kullanabiliyor olmalısınız.
