@@ -29,8 +29,8 @@ TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir reh
         * [Ağaçlar](#324-a%C4%9Fa%C3%A7lar)
     * [Sonsuz Yapılar](#33-sonsuz-yap%C4%B1lar)
 * [Çok Zor Kısım](#4-%C3%87ok-zor-k%C4%B1s%C4%B1m)
-    * IO ile Baş Etmek
-    * IO Hileleri
+    * [IO ile Baş Etmek](#41-io-ile-ba%C5%9F-etmek)
+    * [IO Hileleri](#42-io-hileleri)
     * Monad
         * Maybe Monad'ı
         * Liste Monad'ı
@@ -1791,7 +1791,7 @@ Peki bu nedir ki? `Maybe` bir parametre alan bir tiptir. Tanımı da şudur:
 data Maybe a = Nothing | Just a
 ```
 
-Bu bir değer okumaya veya yaratmaya çalışırken bir hata olduğunu ifade etmenin güzel bir yoludur. `maybeRead` fonksiyonu bunun iyi bir örneği. Bu `read`'e benzer bir fonksiyon, ama eğer bir şeyler yanlış giderse dönen değer `Nothing` olacak. Eğer bir değer okuyabilirse, dönen değer `Just <değer>` olacak. Bu fonksiyonu çok anlamaya çalışmayın; `read`'den daha alt seviye bir fonksiyon olan `reads`'i kullanıyorum.
+Bu bir değer okumaya veya yaratmaya çalışırken bir hata olduğunu ifade etmenin güzel bir yoludur. `maybeRead` fonksiyonu bunun iyi bir örneği. Bu `read`'e [^fn-5] benzer bir fonksiyon, ama eğer bir şeyler yanlış giderse dönen değer `Nothing` olacak. Eğer bir değer okuyabilirse, dönen değer `Just <değer>` olacak. Bu fonksiyonu çok anlamaya çalışmayın; `read`'den daha alt seviye bir fonksiyon olan `reads`'i kullanıyorum.
 
 ```haskell
 maybeRead :: Read a => String -> Maybe a
@@ -1904,6 +1904,11 @@ Biraz çalışırsanız, `IO` kullanabiliyor olmalısınız.
 #### Dipnotlar
 
 [^fn-1]: Son zamanda çıkan diller onları saklamaya çalışsa da, onlar oradalar.
+
 [^fn-2]: Hile yaptığımı biliyorum. Ama tembellikle ilgili sonra konuşacağız.
+
 [^fn-3]: Daha cesur olanlarınız için örüntülü eşlemeyle ilgili daha kapsamlı bir açıklama [şuradan](http://www.cs.auckland.ac.nz/references/haskell/haskell-intro-html/patterns.html) okunabilir.
+
 [^fn-4]: `squareEvenSum''` fonksiyonunun diğer ikisinden daha verimli olduğuna dikkat edin. `(.)` fonksiyonunun sırası önemlidir.
+
+[^fn-5]: Ki kendisi JavaScript'te JSON bulunduran bir karakter dizisi üzerinde `eval` çalıştırmaya çok benzer. (Çevirmen notu: `JSON.parse` daha iyi çözüm olabilir.)
