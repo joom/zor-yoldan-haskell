@@ -44,7 +44,7 @@ Tüm geliştiricilerin Haskell öğrenmesi gerektiğine inanıyorum. Herkesin s�
 Anaakım diller aynı temelleri paylaşırlar:
 * değişkenler
 * döngüler
-* işaretçiler *(pointer)*
+* işaretçiler *(pointer)* [^fn-1]
 * veri yapıları, nesneler ve sınıflar (genellikle)
 
 Haskell çok farklıdır. Bu dil daha önce hiç duymamış olduğum bir sürü kavram kullanıyor. Bu kavramların çoğu daha iyi bir programcı olmanızda yardımcı olacaktır.
@@ -586,3 +586,457 @@ Zor kısım şimdi başlıyor.
 
 ![Functional](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/hr_giger_biomechanicallandscape_500.jpg)
 
+Bu bölümde, Haskell'in etkileyici yeniden yapılandırma *(refaçtoring)* yeteneklerini göreceğiz. Bir problem seçip önce standart imperatif yolla çözeceğiz. Daha sonra kodun evrimini göreceğiz, son hali çok daha zarif ve kolay anlaşılabilir olacak.
+
+Aşağıdaki problemi çözelim:
+
+> Verilen bir tam sayı listesindeki çift sayıların toplamını alın.
+> Örnek: `[1,2,3,4,5] ⇒ 2 + 4 ⇒ 6`
+
+Fonksiyonel ve imperatif yaklaşımların arasındaki farkı göstermek için, imperatif çözümü göstererek başlayacağım: (JavaScript'te)
+
+```javascript
+function evenSum(list) {
+    var result = 0;
+    for (var i=0; i< list.length ; i++) {
+        if (list[i] % 2 ==0) {
+            result += list[i];
+        }
+    }
+    return result;
+}
+```
+
+Haskell'de, farklı olarak, değişkenler veya `for` döngüleri yoktur. Döngüler olmaksızın aynı sonucu elde etmenin bir yolu özyinelemedir. *(recursion)*
+
+> Dikkat: Özyineleme imperatif dillerde genellikle yavaş olarak algılanır. Fonksiyonel programlamada genellikle durum bu değildir. Çoğu zaman Haskell özyinelemeli fonksiyonları verimli şekilde işler.
+
+İşte özyinelemeli fonksiyonun `C` versiyonu. Basitlik için tam sayı listesinin ilk `0` değeri ile bittiğini varsaydığıma dikkat edin.
+
+```c
+int evenSum(int *list) {
+    return accumSum(0,list);
+}
+
+int accumSum(int n, int *list) {
+    int x;
+    int *xs;
+    if (*list == 0) { // eger liste bossa
+        return n;
+    } else {
+        x = list[0]; // x listenin ilk elemani olsun
+        xs = list+1; // xs listenin ilk elemani haric geri kalani olsun
+        if ( 0 == (x%2) ) { // eger x ciftse
+            return accumSum(n+x, xs);
+        } else {
+            return accumSum(n, xs);
+        }
+    }
+}
+```
+
+Bu kodu aklınızda tutun. Şimdi onu Haskell'e çevireceğiz. Ama ilk önce, size burada kullanacağımız üç basit ama kullanışlı fonksiyonu tanıtmam gerekiyor:
+
+```haskell
+even :: Integral a => a -> Bool
+head :: [a] -> a
+tail :: [a] -> [a]
+```
+
+`even` bir sayının çift olduğunu doğrular.
+
+```haskell
+even :: Integral a => a -> Bool
+even 3  ⇒ False
+even 2  ⇒ True
+```
+
+`head` bir listenin ilk elemanını döndürür.
+
+```haskell
+head :: [a] -> a
+head [1,2,3] ⇒ 1
+head []      ⇒ HATA
+```
+
+`tail` bir listenin ilk elemanı hariç tüm elemanlarını döndürür.
+
+```haskell
+tail :: [a] -> [a]
+tail [1,2,3] ⇒ [2,3]
+tail [3]     ⇒ []
+tail []      ⇒ HATA
+```
+
+Görebileceğiniz üzere, herhangi bir boş olmayan `l` listesi için, `l ⇔ (head l):(tail l)`
+
+***
+
+[02_Hard_Part/11_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/11_Functions.lhs)
+
+
+İlk Haskell çözümümüz. `evenSum` fonksiyonu bir listedeki tüm çift sayıların toplamını döndürür.
+
+```haskell
+-- Versiyon 1
+evenSum :: [Integer] -> Integer
+
+evenSum l = accumSum 0 l
+
+accumSum n l = if l == []
+                  then n
+                  else let x = head l 
+                           xs = tail l 
+                       in if even x
+                              then accumSum (n+x) xs
+                              else accumSum n xs
+```
+
+Fonksiyonu denemek için `ghci`'ı kullanabilirsiniz.
+
+```
+% ghci
+GHCi, version 7.0.3: http://www.haskell.org/ghc/  :? for help
+Loading package ghc-prim ... linking ... done.
+Loading package integer-gmp ... linking ... done.
+Loading package base ... linking ... done.
+Prelude> :load 11_Functions.lhs 
+[1 of 1] Compiling Main             ( 11_Functions.lhs, interpreted )
+Ok, modules loaded: Main.
+*Main> evenSum [1..5]
+6
+```
+
+Burada çalıştırılma örneğini görebilirsiniz: [^fn-2]
+
+```
+*Main> evenSum [1..5]
+accumSum 0 [1,2,3,4,5]
+1 is odd
+accumSum 0 [2,3,4,5]
+2 is even
+accumSum (0+2) [3,4,5]
+3 is odd
+accumSum (0+2) [4,5]
+4 is even
+accumSum (0+2+4) [5]
+5 is odd
+accumSum (0+2+4) []
+l == []
+0+2+4
+0+6
+6
+```
+
+İmperatif bir dilden geliyorsanız her şey doğru gözüküyor olmalı. Aslında burada pek çok şey geliştirilebilir. Öncelikle, tipi genelleyebiliriz.
+
+```haskell
+evenSum :: Integral a => [a] -> a
+```
+
+[02_Hard_Part/11_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/11_Functions.lhs)
+
+***
+
+[02_Hard_Part/12_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/12_Functions.lhs)
+
+Daha sonra, `where` veya `let` kullanarak alt fonksiyonlar tanımlayabiliriz. Bu şekilde `accumSum` fonksiyonu modülümüzün üst seviye isim uzayını *(namespace)* kirletmemiş olur.
+
+```haskell
+-- Versiyon 2
+evenSum :: Integral a => [a] -> a
+
+evenSum l = accumSum 0 l
+    where accumSum n l = 
+            if l == []
+                then n
+                else let x = head l 
+                         xs = tail l 
+                     in if even x
+                            then accumSum (n+x) xs
+                            else accumSum n xs
+```
+
+[02_Hard_Part/12_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/12_Functions.lhs)
+
+***
+
+[02_Hard_Part/13_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/13_Functions.lhs)
+
+Sonra, örüntülü eşleme *(pattern matching)* kullanabiliriz.
+
+```haskell
+-- Versiyon 3
+evenSum l = accumSum 0 l
+    where 
+        accumSum n [] = n
+        accumSum n (x:xs) = 
+             if even x
+                then accumSum (n+x) xs
+                else accumSum n xs
+```
+
+Peki örüntülü eşleme nedir? Genel parametre isimleri yerine değerlerin kendisini kullanın. [^fn-3]
+
+`foo l = if l == [] then <x> else <y>` demek yerine, basitçe şöyle diyorsunuz:
+
+```haskell
+foo [] =  <x>
+foo l  =  <y>
+```
+
+Ama örüntülü eşleme bundan daha fazlası. Aynı zamanda karmaşık bir değerin iç verişini takip etmenin bir yolu. Şu kodun yerine:
+
+```haskell
+foo l =  let x  = head l 
+             xs = tail l
+         in if even x 
+             then foo (n+x) xs
+             else foo n xs
+```
+
+şunu yazabiliriz:
+
+```haskell
+foo (x:xs) = if even x 
+                 then foo (n+x) xs
+                 else foo n xs
+```
+
+Bu cok kullanisli bir ozellik. Ayni zamanda kodumuzu daha kisa ve okunakli kiliyor.
+
+[02_Hard_Part/13_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/13_Functions.lhs)
+
+***
+
+[02_Hard_Part/14_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/14_Functions.lhs)
+
+Haskell'de η sadeleştirmesi yaparak fonksiyonları basitleştirebilirsiniz. Örneğin, şunu yazmak yerine:
+
+```
+f x = (some expression) x
+```
+
+basitçe şunu yazabilirsiniz:
+
+```
+f = some expression
+```
+
+Bu metodu `l`'yi kaldirmak icin kullanalim:
+
+```haskell
+-- Version 4
+evenSum :: Integral a => [a] -> a
+
+evenSum = accumSum 0
+    where 
+        accumSum n [] = n
+        accumSum n (x:xs) = 
+             if even x
+                then accumSum (n+x) xs
+                else accumSum n xs
+```
+
+[02_Hard_Part/14_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/14_Functions.lhs)
+
+***
+
+[02_Hard_Part/15_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/15_Functions.lhs)
+
+## 3.1.1. Üst Derece Fonksiyonlar
+
+![Higher Order](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/escher_polygon.png)
+
+Her şeyi daha da iyi yapmak için, üst derece fonksiyonları kullanmalıyız. Peki bu canavarlar nelerdir? Üst derece fonksiyonlarlar, başka fonksiyonları parametre olarak alan fonksiyonlardır.
+
+Bazı örnekleri şöyledir:
+
+```haskell
+filter :: (a -> Bool) -> [a] -> [a]
+map :: (a -> b) -> [a] -> [b]
+foldl :: (a -> b -> a) -> a -> [b] -> a
+```
+
+Ufak adımlarla ilerleyelim.
+
+```haskell
+-- Version 5
+evenSum l = mysum 0 (filter even l)
+    where
+      mysum n [] = n
+      mysum n (x:xs) = mysum (n+x) xs
+```
+
+ki burada,
+
+```haskell
+filter even [1..10] ⇔  [2,4,6,8,10]
+```
+
+`filter` fonksiyonu `a -> Bool` tipinde bir fonksiyonu  ve `[a]` tipinde bir listeyi argüman olarak alır. Bu listeden sadece bu fonksiyon çalıştırıldığında `True` dönen elemanları dondurur.
+
+Sonraki adımımız, döngüye benzer bir şeyi başarmak. `foldl` fonksiyonunu listede adım adım ilerlerken yanda bir değer biriktirmek için kullanacağız. `foldl` fonksiyonu aslında şu kalıbı alıp:
+
+```haskell
+myfunc list = foo initialValue list
+    foo accumulated []     = accumulated
+    foo tmpValue    (x:xs) = foo (bar tmpValue x) xs
+```
+
+Şu hale çevirir:
+
+```haskell
+myfunc list = foldl bar initialValue list
+```
+
+Eğer gerçekten bu sihirli şeyin nasıl çalıştığını görmek istiyorsanız, `foldl`'in tanımı şöyledir:
+
+```haskell
+foldl f z [] = z
+foldl f z (x:xs) = foldl f (f z x) xs
+```
+
+```haskell
+foldl f z [x1,...xn]
+⇔  f (... (f (f z x1) x2) ...) xn
+```
+
+Ama Haskell tembel olduğu için `(f z x)`'in değerini hesaplamaz ve sadece yığının üstüne koyar. Bu yüzden genelde `foldl` yerine `foldl'` kullanırız; `foldl'`, `foldl` fonksiyonunun tembel olmayan versiyonudur. Eğer tembel ve tembel olmayan kavramlarını anlamıyorsanız, tasalanmayın, kodu `foldl` ve `foldl'` aynı şeylermiş gibi takip edin.
+
+Şimdi `evenSum` fonksiyonumuzun yeni hali şöyle oldu:
+
+```haskell
+-- Versiyon 6
+-- foldl' dogrudan erisilebilir
+-- erismek icin once Data.List modulunu iceri almamiz gerekiyor
+import Data.List
+evenSum l = foldl' mysum 0 (filter even l)
+  where mysum acc value = acc + value
+```
+
+Doğrudan lambda notasyonu kullanarak daha da basitleştirebiliriz. Böylece `mysum` isminde geçici bir fonksiyon yaratmak zorunda kalmayız.
+
+```haskell
+-- Versiyon 7
+-- Genelde sadece ihtiyac duydugunuz fonksiyonlari
+-- iceri almak daha iyi bir yontemdir
+import Data.List (foldl')
+evenSum l = foldl' (\x y -> x+y) 0 (filter even l)
+```
+
+Ve tabii ki, dikkat edelim ki:
+
+```haskell
+(\x y -> x+y) ⇔ (+)
+```
+
+[02_Hard_Part/15_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/15_Functions.lhs)
+
+***
+
+[02_Hard_Part/16_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/16_Functions.lhs)
+
+Son olarak,
+
+```haskell
+-- Versiyon 8
+import Data.List (foldl')
+evenSum :: Integral a => [a] -> a
+evenSum l = foldl' (+) 0 (filter even l)
+```
+
+`foldl'` anlaması kolay bir fonksiyon sayılmaz. Eğer alışık değilseniz, üzerinde biraz çalışmalısınız.
+
+Burada ne olduğunu anlamanız için adım adım neler olduğuna bakalım:
+
+```haskell
+  evenSum [1,2,3,4]
+⇒ foldl' (+) 0 (filter even [1,2,3,4])
+⇒ foldl' (+) 0 [2,4]
+⇒ foldl' (+) (0+2) [4] 
+⇒ foldl' (+) 2 [4]
+⇒ foldl' (+) (2+4) []
+⇒ foldl' (+) 6 []
+⇒ 6
+```
+
+Başka bir kullanışlı üst derece fonksiyon da `(.)` fonksiyonudur. `(.)` fonksiyonu matematiksel bileşimi *(composition)* ifade eder.
+
+```haskell
+(f . g . h) x ⇔  f ( g (h x))
+```
+
+Bu operatörden fonksiyonumuzda η sadeleştirmesi yapmak için faydanalabiliriz:
+
+```haskell
+-- Versiyon 9
+import Data.List (foldl')
+evenSum :: Integral a => [a] -> a
+evenSum = (foldl' (+) 0) . (filter even)
+```
+
+Ayrıca, bazı kısımları daha iyi açıklamak için yeniden isimlendirebiliriz:
+
+```haskell
+-- Versiyon 10 
+import Data.List (foldl')
+sum' :: (Num a) => [a] -> a
+sum' = foldl' (+) 0
+evenSum :: Integral a => [a] -> a
+evenSum = sum' . (filter even)
+```
+
+Şimdi bu fonksiyonel ifadelerle kodumuzun ne yöne doğru gittiğini tartışalım. Üst derece fonksiyonları kullanmak bize ne kazandırdı?
+
+İlk önce, düşünebilirsiniz ki temel fark kısalık. Ama aslında, fark daha çok doğru düşünmeyle ilgili. Fonksiyonumuzu biraz değiştirmek istediğimizi varsayalım, örneğin bir listedeki tüm elemanların karesini alıp o çift kareleri toplamak istediğimizi.
+
+```
+[1,2,3,4] ▷ [1,4,9,16] ▷ [4,16] ▷ 20
+```
+
+Versiyon 10'u değiştirmek oldukça kolay:
+
+```haskell
+squareEvenSum = sum' . (filter even) . (map (^2))
+squareEvenSum' = evenSum . (map (^2))
+squareEvenSum'' = sum' . (map (^2)) . (filter even)
+```
+
+Sadece bir tane daha transformasyon fonksiyonu ekledik, o kadar. [^fn-4] 
+
+```haskell
+map (^2) [1,2,3,4] ⇔ [1,4,9,16]
+```
+
+`map` fonksiyonu basitçe bir listenin tüm elemanlarını etkiler.
+
+Fonksiyon tanımının *içinde* herhangi bir şey değiştirmek zorunda kalmadık. Ama ek olarak, fonksiyonunuz hakkında daha matematiksel olarak akıl yürütebiliyorsunuz. Ayrıca fonksiyonunuzu diğerleriyle değişmeli de kullanabiliyorsunuz. Yani, yeni fonksiyonunuzu kullanarak `compose`, `map`, `fold`, `filter` işlemlerini yapabilirsiniz.
+
+Versiyon 1'i değiştirmek de okura bir alıştırma olarak kalsın. ☺.
+
+Eğer genellemenin sonuna geldiğimizi düşünüyorsanız, oldukça yanılıyorsunuz. Örneğin, bunu sadece liste değil başka herhangi bir özyinelemeli türde kullanmanın yolları var. Eğer nasıl olduğunu bilmek istiyorsanız, size şu eğlenceli makaleyi okumanızı öneriyorum: [Müz, Mercek, Zarf ve Dikenli Tellerle Fonksiyonel Programlama - Meijer, Fokkinga ve Paterson.](http://eprints.eemcs.utwente.nl/7281/01/db-utwente-40501F46.pdf)
+
+Bu örnek size saf fonksiyonel programlamanın ne kadar güzel olduğunu göstermeli. Ne yazık ki, saf fonksiyonel programlama her kullanıma tam uygun değil. Ya da en azından öyle bir programlama dili henüz mevcut değil.
+
+Haskell'in büyük güçlerinden biri de alana özel dil *(domain specific language)* yaratma yeteneğidir, böylece programlama paradigmasını değiştirebilirsiniz.
+
+Aslında, Haskell imperatif stilde program yazmak istediğinizde de güzeldir. İlk Haskell öğrenmeye başladığımda bunu anlamak oldukça zor olmuştu. Genelde herkes fonksiyonel yaklaşımın üstünlüğünü anlatmaya çalışır. Daha sonra Haskell'le imperatif stil kullanmaya başlayınca, nasıl ve ne zaman öyle olacağını anlamak zor olabiliyor.
+
+Bu Haskell süper gücüyle ilgili konuşmadan önce, Haskell'in başka bir temel yönünden bahsetmeliyiz: Tipler.
+
+[02_Hard_Part/16_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/16_Functions.lhs)
+
+## 3.2. Tipler
+
+
+
+
+***
+
+#### Dipnotlar
+
+[^fn-1]: Son zamanda çıkan diller onları saklamaya çalışsa da, onlar oradalar.
+[^fn-2]: Hile yaptığımı biliyorum. Ama tembellikle ilgili sonra konuşacağız.
+[^fn-3]: Daha cesur olanlarınız için örüntülü eşlemeyle ilgili daha kapsamlı bir açıklama [şuradan](http://www.cs.auckland.ac.nz/references/haskell/haskell-intro-html/patterns.html) okunabilir.
+[^fn-4]: `squareEvenSum''` fonksiyonunun diğer ikisinden daha verimli olduğuna dikkat edin. `(.)` fonksiyonunun sırası önemlidir.
