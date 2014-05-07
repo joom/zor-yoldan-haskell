@@ -2179,7 +2179,7 @@ let ((),w2) = print line1 in
 (res,w2) = (bind getLine (\l -> print l)) w0
 ```
 
-`print` fonksiyonu `(World -> ((),World))` tıpınde olduğu için, `res = ()` (boş tip) Eğer bundaki sihirbazlığı görmediyseniz, bu sefer üç satırla deneyelim:
+`print` fonksiyonu `(World -> ((),World))` tipinde olduğu için, `res = ()` (boş tip) Eğer bundaki sihirbazlığı görmediyseniz, bu sefer üç satırla deneyelim:
 
 ```haskell
 let (line1,w1) = getLine w0 in
@@ -2340,7 +2340,7 @@ class Monad m  where
 
 > Notlar:
 > * `class` anahtar kelimesi dostunuz değildir. Haskell'deki class nesne yönelimli programlamada karşılaştığınız class gibi değildir. Haskell'deki class Java'daki interface'le benzeşir. `typeclass` daha iyi bir isimlendirme olurdu, çünkü o tip grubu anlamına geliyor. Bir tipin bir sınıfa ait olması için, bir sınıfın tüm fonksiyonlarının o tip için sağlanabilir olması gerekiyor.
-> * Tip sınıflarının bu örneğinde, `m` tıpının argüman alan bir tip olması gerekiyor, örneğin `IO a`, ama aynı zamanda `Maybe a`, `[a]`, vs.
+> * Tip sınıflarının bu örneğinde, `m` tipinin argüman alan bir tip olması gerekiyor, örneğin `IO a`, ama aynı zamanda `Maybe a`, `[a]`, vs.
 > * Fonksiyonunuzun kullanışlı bir monad olması için bazı kurallara uyması gerekiyor. Eğer yapınız bu kurallara uymuyorsa garip şeyler gerçekleşebilir: `~ return a >>= k == k a m >>= return == m m >>= (-> k x >>= h) == (m >>= k) >>= h ~`
 
 ### 4.3.1 Maybe Monad'ı
