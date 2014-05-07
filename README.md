@@ -36,10 +36,10 @@
     * [IO ile Baş Etmek](#41-io-ile-ba%C5%9F-etmek)
     * [IO'nun Püf Noktası](#42-ionun-p%C3%BCf-noktas%C4%B1)
     * [Monad](#43-monad)
-        * Maybe Monad'ı
-        * Liste Monad'ı
-* Ek
-    * Sonsuz Ağaçlar Hakkında
+        * [Maybe Monad'ı](#431-maybe-monad%C4%B1)
+        * [Liste Monad'ı](#432-liste-monad%C4%B1)
+* [Ekler](#5-ekler)
+    * [Sonsuz Ağaçlar Hakkında](#51-sonsuz-a%C4%9Fa%C3%A7lar-hakk%C4%B1nda)
 
 ***
 
@@ -2515,7 +2515,7 @@ Tüm monadları sıralamayacağım, ancak bir sürü monad bulunmakta. Saf dille
 * yazma durumu
 * ..
 
-Eğer buraya kadar beni takip edebildiyseniz, başardınız! Monadları öğrendiniz!
+Eğer buraya kadar beni takip edebildiyseniz, başardınız! Monadları öğrendiniz! [^fn-8]
 
 [03_Hell/02_Monads/13_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/13_Monads.lhs)
 
@@ -2546,3 +2546,5 @@ Bu bölüm doğrudan Haskell'le ilgili değil. Bazı ayrıntılı açıklamalar 
 [^fn-6]: Bu kurala bazı güvenli olmayan istisnalar da var. Ama belki hata ayıklama amacı dışında hiçbir gerçek uygulamada böyle bir kullanım görmezsiniz.
 
 [^fn-7]: Merak edenler için: gerçek tip şöyle: `data IO a = IO {unIO :: State# RealWorld -> (# State# RealWorld, a #)}`. `#` işareti optimizasyonla ilgili, ve ben örneğimde alan yerlerini değiştirdim. Ama ana fikir bu.
+
+[^fn-8]: Tabii ki alışana ve tamamen anlayana kadar çalışmanız gerekiyor. Ama bu yönde büyük bir adım attınız bile.
