@@ -1,6 +1,6 @@
 > This is the Turkish translation of Yann Esposito's article [Learn Haskell Fast and Hard](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/).
 
-> Bu yazı Yann Esposito'nun [Learn Haskell Fast and Hard](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/) Türkçe çevirisidir.
+> Yann Esposito'nun [Learn Haskell Fast and Hard](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/) başlıklı yazısının Türkçe çevirisidir.
 
 # Zor Yoldan Haskell
 
@@ -35,7 +35,7 @@
 * [Çok Zor Kısım](#4-%C3%87ok-zor-k%C4%B1s%C4%B1m)
     * [IO ile Baş Etmek](#41-io-ile-ba%C5%9F-etmek)
     * [IO'nun Püf Noktası](#42-ionun-p%C3%BCf-noktas%C4%B1)
-    * Monad
+    * [Monad](#43-monad)
         * Maybe Monad'ı
         * Liste Monad'ı
 * Ek
@@ -2053,7 +2053,271 @@ Benzer, ama biraz daha garip. Tüm şu geçici `w?`'lere bakın.
 
 Çıkarılacak ders şu: Saf fonksiyonel dillerdeki naif IO uygulamaları gariptir!
 
-Şanslıyız ki, bu sorunu halletmek için daha iyi bir yol var.
+Şanslıyız ki, bu sorunu halletmek için daha iyi bir yol var. Bir kalip goruyoruz, her satir su sekilde:
+
+```haskell
+let (y,w') = action x w in
+```
+
+Herhangi bir satır için ilk `x` argümanı gerekmese bile. Dönen sonucun tipi bir ikili, `(sonuç, yeniDünyaDeğeri)`. Her `f` fonksiyonu şuna benzer bir tipe sahip olmak zorunda:
+
+```haskell
+f :: World -> (a,World)
+```
+
+Her zaman aynı kalıbı takip ettiğimize dikkat edin:
+
+```haskell
+let (y,w1) = action1 w0 in
+let (z,w2) = action2 w1 in
+let (t,w3) = action3 w2 in
+...
+```
+
+Her aksiyon 0'dan n'ye kadar parametre alabilir. Ve özellikle, her aksiyon bir üstündeki satırın sonucundan parametre alabilir.
+
+Örneğin, şöyle diyebiliriz:
+
+```haskell
+let (_,w1) = action1 x w0   in
+let (z,w2) = action2 w1     in
+let (_,w3) = action3 x z w2 in
+...
+```
+
+Ve tabii ki `actionN w :: (World) -> (a,World)`.
+
+> Önemli: Dikkat edilmesi gereken iki kalıp var:
+
+```haskell
+let (x,w1) = action1 w0 in
+let (y,w2) = action2 x w1 in
+```
+
+> ve
+
+```haskell
+let (_,w1) = action1 w0 in
+let (y,w2) = action2 w1 in
+```
+
+***
+
+![Joker](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/jocker_pencil_trick.jpg)
+
+Şimdi biraz sihirbazlık yapalım. Geçici dünya sembolünü "yok edelim". İki satırı `bind` ile birbirine bağlayacağız. İşe `bind` fonksiyonunu tanımlayarak başlayalım. Fonksiyonun tipi başta biraz korkutucu gelebilir:
+
+```haskell
+bind :: (World -> (a,World))
+        -> (a -> (World -> (b,World)))
+        -> (World -> (b,World))
+```
+
+Ama hatırlayın ki `(World -> (a,World))` IO aksiyonlarının tipidir. Daha açık olması için ona yeni bir isim verelim:
+
+```haskell
+type IO a = World -> (a, World)
+```
+
+Bazı fonksiyon örnekleri:
+
+```haskell
+getLine :: IO String
+print :: Show a => a -> IO ()
+```
+
+`getLine` dünyayı parametre olarak alan ve `(String,World)` ikilisini döndüren bir IO aksiyonudur. Bu şöyle özetlenebilir: `getLine`, `IO String` tipindedır, ki bunu "IO içine gömülmüş" String döndüren bir IO aksiyonu olarak görebiliriz.
+
+`print` fonksiyonu da ayrıca ilginçtir. Gösterilebilir bir argüman alır, ama aslında iki argüman almaktadır. İlki ekrana yazdırılacak değerdir, ikincisi de dünyanın durumudur. Sonrasında ise `((),World)` ikilisini döndürür. Bu fonksiyonun dünyanın durumunu değiştirdiği ama başka bir veri üretmediği anlamına gelir.
+
+Bu tip, `bind` fonksiyonun tipini basitleştirmemize yardımcı olur:
+
+```haskell
+bind :: IO a
+        -> (a -> IO b)
+        -> IO b
+```
+
+Bu demek oluyor ki `bind` fonksiyonu iki IO aksiyonunu parametre olarak alıyor ve başka bir IO aksiyonunu geri döndürüyor.
+
+Önemli kalıpları tekrar hatırlayın. İlki şuydu:
+
+```haskell
+let (x,w1) = action1 w0 in
+let (y,w2) = action2 x w1 in
+(y,w2)
+```
+
+Fonksiyonların tiplerine bakalım:
+
+```haskell
+action1  :: IO a
+action2  :: a -> IO b
+(y,w2)   :: IO b
+```
+
+Tanıdık gelmiyor mu?
+
+```haskell
+(bind action1 action2) w0 =
+    let (x, w1) = action1 w0
+        (y, w2) = action2 x w1
+    in  (y, w2)
+```
+
+Amacımız World argümanını bu fonksiyonla gizlemek. Örnek olarak, şunu gerçekleştirmek istediğimizi varsayalım:
+
+```haskell
+let (line1,w1) = getLine w0 in
+let ((),w2) = print line1 in
+((),w2)
+```
+
+Şimdi, `bind` fonksiyonunu kullanarak:
+
+```haskell
+(res,w2) = (bind getLine (\l -> print l)) w0
+```
+
+`print` fonksiyonu `(World -> ((),World))` tıpınde olduğu için, `res = ()` (boş tip) Eğer bundaki sihirbazlığı görmediyseniz, bu sefer üç satırla deneyelim:
+
+```haskell
+let (line1,w1) = getLine w0 in
+let (line2,w2) = getLine w1 in
+let ((),w3) = print (line1 ++ line2) in
+((),w3)
+```
+
+Bu da şuna denk:
+
+```haskell
+(res,w3) = (bind getLine (\line1 ->
+             (bind getLine (\line2 ->
+               print (line1 ++ line2))))) w0
+```
+
+Bir şey fark ettiniz mi? Evet, artık hiçbir yerde geçici World değişkenleri kullanılmıyor. Sihirbazlık gibi.
+
+Daha iyi bir notasyon kullanabiliriz. `bind` yerine `(>>=)` kullanalım. `(>>=)`, `(+)` gibi bir iç notasyonlu fonksiyondur; ki şöyle çalışır: `3 + 4 ⇔ (+) 3 4`
+
+Ho Ho Ho! Herkese Mutlu Noeller! Haskell bize söz dizimsel kolaylık sağlıyor:
+
+```haskell
+do
+  x <- action1
+  y <- action2
+  z <- action3
+  ...
+```
+
+yerine, şöyle yazabiliriz:
+
+```haskell
+action1 >>= (\x ->
+action2 >>= (\y ->
+action3 >>= (\z ->
+...
+)))
+```
+
+`action2` içinde `x`, `action3` içinde hem `x` hem de `y` değişkenlerini kullanabildiğinize dikkat edin.
+
+Peki `<-` kullanmayan satırlarda ne yapacağız? Kolay, `blindBind` diye başka bir fonksiyon tanımlayalım:
+
+```haskell
+blindBind :: IO a -> IO b -> IO b
+blindBind action1 action2 w0 =
+    bind action (\_ -> action2) w0
+```
+
+Bu tanımı daha açık olması için basitleştirmedim. Tabii daha basit bir notasyon kullanabiliriz, bunun için `(>>)` operatörü var.
+
+```haskell
+do
+    action1
+    action2
+    action3
+```
+
+Şuna dönüşüyor:
+
+```haskell
+action1 >>
+action2 >>
+action3
+```
+
+Kullanisli bir fonksiyon daha var.
+
+```haskell
+putInIO :: a -> IO a
+putInIO x = IO (\w -> (x,w))
+```
+
+Bu saf degerleri IO baglamina sokmak icin kullanilan genel bir yoldur. `putInIO` icin kullanilan genel isim `return`'dur. Haskell ogrenirken bu oldukca kotu bir isim, cunku Haskell'deki `return` alisik oldugunuzden cok farklidir.
+
+[03_Hell/01_IO/21_Detailled_IO.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/21_Detailled_IO.lhs)
+
+Ornegimizi cevirerek bu bolumu bitirelim:
+
+```haskell
+askUser :: IO [Integer]
+askUser = do
+  putStrLn "Bir sayi listesi girin (virgullerle ayirin):"
+  input <- getLine
+  let maybeList = getListFromString input in
+      case maybeList of
+          Just l  -> return l
+          Nothing -> askUser
+
+main :: IO ()
+main = do
+  list <- askUser
+  print $ sum list
+```
+
+Su hale geliyor:
+
+```haskell
+import Data.Maybe
+
+maybeRead :: Read a => String -> Maybe a
+maybeRead s = case reads s of
+                  [(x,"")]    -> Just x
+                  _           -> Nothing
+getListFromString :: String -> Maybe [Integer]
+getListFromString str = maybeRead $ "[" ++ str ++ "]"
+askUser :: IO [Integer]
+askUser = 
+    putStrLn "Bir sayi listesi girin (virgullerle ayirin):" >>
+    getLine >>= \input ->
+    let maybeList = getListFromString input in
+      case maybeList of
+        Just l -> return l
+        Nothing -> askUser
+
+main :: IO ()
+main = askUser >>=
+  \list -> print $ sum list
+```
+
+Calistigini dogrulamak icin derleyebilirsiniz.
+
+`(>>)` ve `(>>=)` olmadan nasil olacagini dusunun.
+
+
+[03_Hell/01_IO/21_Detailled_IO.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/21_Detailled_IO.lhs)
+
+***
+
+[03_Hell/02_Monads/10_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/10_Monads.lhs)
+
+## 4.3. Monad
+
+![Monad](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/dali_reve.jpg)
+
+
+
 
 ***
 
