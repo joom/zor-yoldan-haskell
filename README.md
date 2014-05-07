@@ -2247,18 +2247,18 @@ action2 >>
 action3
 ```
 
-Kullanisli bir fonksiyon daha var.
+Kullanışlı bir fonksiyon daha var.
 
 ```haskell
 putInIO :: a -> IO a
 putInIO x = IO (\w -> (x,w))
 ```
 
-Bu saf degerleri IO baglamina sokmak icin kullanilan genel bir yoldur. `putInIO` icin kullanilan genel isim `return`'dur. Haskell ogrenirken bu oldukca kotu bir isim, cunku Haskell'deki `return` alisik oldugunuzden cok farklidir.
+Bu saf değerleri IO bağlamına sokmak için kullanılan genel bir yoldur. `putInIO` için kullanılan genel isim `return`'dür. Haskell öğrenirken bu oldukça kötü bir isim, çünkü Haskell'deki `return` alışık olduğunuzden çok farklıdır.
 
 [03_Hell/01_IO/21_Detailled_IO.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/21_Detailled_IO.lhs)
 
-Ornegimizi cevirerek bu bolumu bitirelim:
+Örneğimizi çevirerek bu bölümü bitirelim:
 
 ```haskell
 askUser :: IO [Integer]
@@ -2276,7 +2276,7 @@ main = do
   print $ sum list
 ```
 
-Su hale geliyor:
+Şu hale geliyor:
 
 ```haskell
 import Data.Maybe
@@ -2301,9 +2301,9 @@ main = askUser >>=
   \list -> print $ sum list
 ```
 
-Calistigini dogrulamak icin derleyebilirsiniz.
+Çalıştığını doğrulamak için derleyebilirsiniz.
 
-`(>>)` ve `(>>=)` olmadan nasil olacagini dusunun.
+`(>>)` ve `(>>=)` olmadan nasıl olacağını düşünün.
 
 
 [03_Hell/01_IO/21_Detailled_IO.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/21_Detailled_IO.lhs)
