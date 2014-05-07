@@ -2527,7 +2527,176 @@ Bu bölüm doğrudan Haskell'le ilgili değil. Bazı ayrıntılı açıklamalar 
 
 ## 5.1. Sonsuz Ağaçlar Hakkında
 
+[Sonsuz Yapılar](#33-sonsuz-yap%C4%B1lar) kısmında bazı basit yapılar görmüştük. Ancak ağacımızdan iki özellik çıkartmıştık:
 
+1. tekrar eden düğümlerin olmaması
+2. düzgün sıralı ağaç olması
+
+Bu bölümde ilk özelliği sağlamaya çalışacağız. İkincisiyle ilgili olarak da şimdilik bir şey yapmayacağız ama nasıl olabildiğince sıralı tutabileceğimizi tartışacağız.
+
+İlk adımımız (sözde) rastgele bir sayı listesi oluşturmak olsun:
+
+```haskell
+shuffle = map (\x -> (x*3123) `mod` 4331) [1..]
+```
+
+`treeFromList` fonksiyonunun tanımını hatırlayalım:
+
+```haskell
+treeFromList :: (Ord a) => [a] -> BinTree a
+treeFromList []    = Empty
+treeFromList (x:xs) = Node x (treeFromList (filter (<x) xs))
+                             (treeFromList (filter (>x) xs))
+```
+
+`treeTakeDepth` de şöyleydi:
+
+```haskell
+treeTakeDepth _ Empty = Empty
+treeTakeDepth 0 _     = Empty
+treeTakeDepth n (Node x left right) = let
+          nl = treeTakeDepth (n-1) left
+          nr = treeTakeDepth (n-1) right
+          in
+              Node x nl nr
+```
+
+Programımız da şu şekilde:
+
+```haskell
+main = do
+      putStrLn "take 10 shuffle"
+      print $ take 10 shuffle
+      putStrLn "\ntreeTakeDepth 4 (treeFromList shuffle)"
+      print $ treeTakeDepth 4 (treeFromList shuffle)
+```
+
+```
+% runghc 02_Hard_Part/41_Infinites_Structures.lhs
+take 10 shuffle
+[3123,1915,707,3830,2622,1414,206,3329,2121,913]
+treeTakeDepth 4 (treeFromList shuffle)
+
+< 3123
+: |--1915
+: |  |--707
+: |  |  |--206
+: |  |  `--1414
+: |  `--2622
+: |     |--2121
+: |     `--2828
+: `--3830
+:    |--3329
+:    |  |--3240
+:    |  `--3535
+:    `--4036
+:       |--3947
+:       `--4242
+```
+
+Hey! Sonlanıyor! Ama dikkat edin, program sadece dallara koyacak veri olduğu sürece çalışacak.
+
+Örneğin:
+
+```haskell
+treeTakeDepth 4 (treeFromList [1..]) 
+```
+
+sonsuza kadar çalışacak, çünkü `filter (<1) [2..]` ifadesinin ilk elemanını almaya çabalayacak. Ama `filter` fonksiyonu sonucun boş liste olduğunu anlayacak kadar akıllı değil.
+
+Bunlar da okur için alıştırma olarak kalsın:
+
+* `treeTakeDepth n (treeFromList shuffle)` ifadesini sonsuz döngüye sokacak bir `n` değeri olduğunu kanıtlayın.
+* `n` için bir üst sınır bulun.
+* Hiçbir `shuffle` listesinin programı bitiremeyeceğini kanıtlayın.
+
+[04_Appendice/01_More_on_infinite_trees/10_Infinite_Trees.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/04_Appendice/01_More_on_infinite_trees/10_Infinite_Trees.lhs)
+
+***
+
+[04_Appendice/01_More_on_infinite_trees/11_Infinite_Trees.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/04_Appendice/01_More_on_infinite_trees/11_Infinite_Trees.lhs)
+
+Bu sorunları çözmek için `treeFromList` ve `shuffle` fonksiyonlarımızı biraz değiştireceğiz.
+
+İlk sorunumuz, `shuffle` fonksiyon tanımımızda sonsuz farklı sayı üreten bir yapı olmaması. Sadece `4331` farklı sayı ürettik. Bunu çözmek için daha iyi bir `shuffle` fonksiyonu yazalım.
+
+```haskell
+shuffle = map rand [1..]
+          where 
+              rand x = ((p x) `mod` (x+c)) - ((x+c) `div` 2)
+              p x = m*x^2 + n*x + o -- bir polinom
+              m = 3123    
+              n = 31
+              o = 7641
+              c = 1237
+```
+
+Bu `shuffle` fonksiyonunun (umarız ki) bir alt veya üst limiti yok. Ama daha iyi bir rastgele sayı fonksiyonu sonsuz döngüye girmeyi engellemiyor.
+
+Genel olarak, `filter (<x) xs`'in boş liste olup olmadığını anlamıyoruz. Öyleyse bu sorunu çözmek için, ikili ağacımızı oluştururken hata vermeyi deneyelim. Kodumuzun bu yeni versiyonu düğümleri için şu özelliğe sahip olan bir ikili ağaç oluşturacak:
+
+> Sol alt ağaçtaki herhangi bir eleman, kökün değeriden daha küçük olmalı.
+
+Dikkat edin ki genel olarak sıralı bir ikili ağaç olarak kalacak. Ayrıca, yapı itibarıyla, her düğüm değeri ağaçta tek olacak, tekrarlanmayacak.
+
+```haskell
+treeFromList :: (Ord a, Show a) => [a] -> BinTree a
+treeFromList []    = Empty
+treeFromList (x:xs) = Node x left right
+          where 
+              left = treeFromList $ safefilter (<x) xs
+              right = treeFromList $ safefilter (>x) xs
+```
+
+Bu yeni `safefilter` fonksiyonu `filter` fonksiyonuna neredeyse denk, ancak eğer liste sonsuzsa sonsuz döngüye girmiyor. Eğer art arda 10000 değerin testi olumsuz çıkarsa, bunu aramanın sonu sayıyor.
+
+```haskell
+safefilter :: (a -> Bool) -> [a] -> [a]
+safefilter f l = safefilter' f l nbTry
+  where
+      nbTry = 10000
+      safefilter' _ _ 0 = []
+      safefilter' _ [] _ = []
+      safefilter' f (x:xs) n = 
+                  if f x 
+                     then x : safefilter' f xs nbTry 
+                     else safefilter' f xs (n-1) 
+```
+
+Şimdi programı çalıştırıp mutlu olabilirsiniz:
+
+```haskell
+main = do
+      putStrLn "take 10 shuffle"
+      print $ take 10 shuffle
+      putStrLn "\ntreeTakeDepth 8 (treeFromList shuffle)"
+      print $ treeTakeDepth 8 (treeFromList $ shuffle)
+```
+
+Ekrana yazdırılan her değerin yazma zamanının farklı olduğunu fark etmelisiniz. Bunun sebebi Haskell'in her değeri sadece ihtiyacı olduğu zaman hesaplaması. Ve bu durumda, bu zaman ekrana yazdırılacağı zaman.
+
+Daha da etkileyici bir şey görmek için `depth` değerini `8`'den `100`'e cikarın. RAM'inizi boğmadan çalışacak! Akış ve hafıza yönetimi Haskell tarafından doğal olarak yapılıyor.
+
+Bu da okura alıştırma olarak kalsın:
+
+* `deep` ve `nbTry` için yüksek sabit değer ile bile, iyi şekilde çalışıyor gibi gözüküyor. Ama en kötü durumda üstel olabilir. `treeFromList` için olabilecek kötü bir liste oluşturun. *ipucu*: [0,-1,-1,....,-1,1,-1,...,-1,1,...] listesini düşünün.
+* `safefilter` fonksiyonunu şöyle tanımlamayı denedim:
+
+```haskell
+  safefilter' f l = if filter f (take 10000 l) == []
+                    then []
+                    else filter f l
+```
+Neden çalışmadığını ve sonsuz döngüye girebileceğini açıklayın.
+* `shuffle`'in artan sınırlarla gerçek bir rastgele liste olduğunu farz edin. Bu yapı üzerinde biraz çalışırsanız, bu yapının 1 olasılıkla sonlu olduğunu fark edeceksiniz. Aşağıdaki kodu kullanarak (hiç `safefilter` yokmuş gibi doğrudan `safefilter'` kullanın) `f` için 1 olasılıkla treeFromList' shuffle'ın sonlu olduğu bir tanım bulun, ve kanıtlayın. Dikkat: bu sadece bir konjektür.
+
+# 6. Teşekkürler
+
+[r/haskell](http://reddit.com/r/haskell) ve [r/programming](http://reddit.com/r/programming) gruplarına teşekkür ediyorum. Yorumları bana çok yardımcı oldu.
+
+Özellikle, [Emm](https://github.com/Emm)'e, İngilizce'mi düzeltmekle uğraştığı zaman için binlerce kez teşekkür ederim.
+
+> Çevirmen Notu: Yazıda herhangi bir Türkçe karakter veya çeviri hatası bulursanız, beni bilgilendirirseniz, veya *pull request* yollayarak düzeltirseniz çok sevinirim. Daha iyi çevirilebileceğini düşündüğünüz bölümler için de bu geçerli. Teşekkürler.
 
 ***
 
