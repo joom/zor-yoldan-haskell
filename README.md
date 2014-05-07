@@ -32,7 +32,7 @@
     * [Sonsuz Yapılar](#33-sonsuz-yap%C4%B1lar)
 * [Çok Zor Kısım](#4-%C3%87ok-zor-k%C4%B1s%C4%B1m)
     * [IO ile Baş Etmek](#41-io-ile-ba%C5%9F-etmek)
-    * [IO Hileleri](#42-io-hileleri)
+    * IO'nun Püf Noktası
     * Monad
         * Maybe Monad'ı
         * Liste Monad'ı
@@ -1897,7 +1897,7 @@ Biraz çalışırsanız, `IO` kullanabiliyor olmalısınız.
 
 [03_Hell/01_IO/03_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/03_progressive_io_example.lhs)
 
-## 4.2. IO Hileleri
+## 4.2. IO'nun Püf Noktası
 
 ![Bu bir pipo degildir](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/magritte_pipe.jpg)
 
@@ -1921,7 +1921,7 @@ main w0 =
 
 > Sonraki aksiyona aktarmamız gereken bir sürü geçici elemanımız var. (burada `w1`, `w2` ve `w3`)
 
-`bind` veya `(>>=)` fonksiyonu yaratıyoruz. `bind` ile artık geçici isimlere ihtiyacımız yok.
+> `bind` veya `(>>=)` fonksiyonu yaratıyoruz. `bind` ile artık geçici isimlere ihtiyacımız yok.
 
 ```haskell
 main =
@@ -1939,6 +1939,40 @@ main = do
 ```
 
 ***
+
+Neden böyle garip bir söz dizimi kullandık ve bu `IO` tipi tam olarak nedir? Anlaşılmaz duruyor ama, değil.
+
+Şimdilik, programımızın saf kısımlarını bir kenara bırakıp saf olmayan kısımlar üzerinde yoğunlaşalım:
+
+```haskell
+askUser :: IO [Integer]
+askUser = do
+  putStrLn "Bir sayi listesi girin (virgulle ayirin):"
+  input <- getLine
+  let maybeList = getListFromString input in
+      case maybeList of
+          Just l  -> return l
+          Nothing -> askUser
+
+main :: IO ()
+main = do
+  list <- askUser
+  print $ sum list
+```
+
+İlk tepki: İmperatif duruyor. Haskell saf olmayan kodu imperatif gösterecek kadar güçlüdür. Örneğin, isterseniz Haskell'de `while` yapısı yaratabilirsiniz. Hatta, `IO` ile uğraşman için imperatif stip genellikle daha uygundur.
+
+Ama notasyonun alışılmışın dışında olduğunu fark etmiş olmalısınız. Şimdi bunun sebeplerini detaylıca tartışalım.
+
+Saf olmayan bir dilde, dünyanın durumu devasa ve gizli bir global değişken olarak görülebilir. Bu gizli değişkene dildeki tüm fonksiyonlar tarafından erişilebilir. Örneğin herhangi bir fonksiyon içinde bir dosya ile okuma/yazma işlemleri yapabilirsiniz. Dosyanın var olup olmaması "dünya"nızın alabileceği olası durumlardır.
+
+Haskell'de bu durum gizli değildir. Tam tersine, Haskell'de `main`'in dünyanızın durumunu değiştirme olasılığı olduğu özellikle ayrıca söylenir. Bu fonksiyonun tipi şunun gibi bir şeydir:
+
+```haskell
+main :: World -> World
+```
+
+Bu değişkene tüm fonksiyonların erişimi yoktur. Erişimi olan fonksiyonlar saf değildir. Dünya değişkenine erişimi olmayan fonksiyonlar ise saftır.
 
 
 
