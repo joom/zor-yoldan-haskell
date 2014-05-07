@@ -1901,6 +1901,48 @@ Biraz çalışırsanız, `IO` kullanabiliyor olmalısınız.
 
 ![Bu bir pipo degildir](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/magritte_pipe.jpg)
 
+> Bu bölüm için TL; DR (Çok uzundu okumadım)
+
+> Saf ve saf olmayan kısımları ayırmak için, `main` dünyanın durumunu değiştiren bir fonksiyon olarak tanımlanır.
+
+```haskell
+main :: World -> World
+```
+
+> Bir fonksiyon, sadece ve sadece bu tipe sahipse yan etkide bulunur. Tipik bir `main` fonksiyonuna bakalım:
+
+```haskell
+main w0 =
+    let (v1,w1) = action1 w0 in
+    let (v2,w2) = action2 v1 w1 in
+    let (v3,w3) = action3 v2 w2 in
+    action4 v3 w3
+```
+
+> Sonraki aksiyona aktarmamız gereken bir sürü geçici elemanımız var. (burada `w1`, `w2` ve `w3`)
+
+`bind` veya `(>>=)` fonksiyonu yaratıyoruz. `bind` ile artık geçici isimlere ihtiyacımız yok.
+
+```haskell
+main =
+  action1 >>= action2 >>= action3 >>= action4
+```
+
+> Bonus: Haskell'in şöyle bir söz dizimsel kolaylığı var:
+
+```haskell
+main = do
+  v1 <- action1
+  v2 <- action2 v1
+  v3 <- action3 v2
+  action4 v3
+```
+
+***
+
+
+
+
 ***
 
 #### Dipnotlar
