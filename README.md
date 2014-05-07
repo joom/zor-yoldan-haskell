@@ -2316,6 +2316,216 @@ main = askUser >>=
 
 ![Monad](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/dali_reve.jpg)
 
+Artık bu sırrı açıklayabiliriz: `IO` bir *monad*dir. Monad olmak, `do` notasyonu ile belirli söz dizimsel kolaylıklara sahip olmak demektir. Ama temel olarak, kodunuzun akışını kolaylaştıracak belirli kod kalıplarına erişim sağlar.
+
+> Önemli noktalar:
+> * Monadlar etkilerle ilgili olmak zorunda değildir! Saf monadlar da vardır.
+> * Monadlar daha çok sıralama ile ilgilidir.
+
+Haskell'de `Monad` bir tip sınıfıdır. Bu sınıfın bir üyesi olmak için `(>>=)` ve `return` fonksiyonlarını sağlamalısınız. `(>>)` fonksiyonu `(>>=)` fonksiyonundan türer. Basit olarak `Monad` tip sınıfı şöyle belirtilir:
+
+```haskell
+class Monad m  where
+  (>>=) :: m a -> (a -> m b) -> m b
+  return :: a -> m a
+
+  (>>) :: m a -> m b -> m b
+  f >> g = f >>= \_ -> g
+
+  -- Sadece tarihsel sebeplerden dolayi oldugunu dusundugum
+  -- bu fonksiyonu dikkate almayabilirsiniz
+  fail :: String -> m a
+  fail = error
+```
+
+> Notlar:
+> * `class` anahtar kelimesi dostunuz değildir. Haskell'deki class nesne yönelimli programlamada karşılaştığınız class gibi değildir. Haskell'deki class Java'daki interface'le benzeşir. `typeclass` daha iyi bir isimlendirme olurdu, çünkü o tip grubu anlamına geliyor. Bir tipin bir sınıfa ait olması için, bir sınıfın tüm fonksiyonlarının o tip için sağlanabilir olması gerekiyor.
+> * Tip sınıflarının bu örneğinde, `m` tıpının argüman alan bir tip olması gerekiyor, örneğin `IO a`, ama aynı zamanda `Maybe a`, `[a]`, vs.
+> * Fonksiyonunuzun kullanışlı bir monad olması için bazı kurallara uyması gerekiyor. Eğer yapınız bu kurallara uymuyorsa garip şeyler gerçekleşebilir: `~ return a >>= k == k a m >>= return == m m >>= (-> k x >>= h) == (m >>= k) >>= h ~`
+
+### 4.3.1 Maybe Monad'ı
+
+`Monad` tip sınıfının üyesi olan bir sürü farklı tip vardır. Tarif etmesi en kolay olanlarından biri de `Maybe`'dir. Eğer `Maybe` değerlerinden oluşan bir diziniz varsa, etkilemek için monadları kullanabilirsiniz. Uzayıp giden `ıf..then..else..` yapılarından kurtulmak için oldukça kullanışlı bir yoldur.
+
+Karmaşık bir banka işlemi düşünün. Eğer bakiyeniz sıfırın altına düşmeden belli işlemleri yapabilecek kadar paranız varsa, 700€ kazanma hakkınız olsun.
+
+```haskell
+deposit  value account = account + value --para yatirma
+withdraw value account = account - value --para cekme
+
+--para kazanmaya hak kazanip kazanmadiginizi donduren fonksiyon
+eligible :: (Num a,Ord a) => a -> Bool
+eligible account =
+  let account1 = deposit 100 account in
+    if (account1 < 0)
+    then False
+    else
+      let account2 = withdraw 200 account1 in
+      if (account2 < 0)
+      then False
+      else
+        let account3 = deposit 100 account2 in
+        if (account3 < 0)
+        then False
+        else
+          let account4 = withdraw 300 account3 in
+          if (account4 < 0)
+          then False
+          else
+            let account5 = deposit 1000 account4 in
+            if (account5 < 0)
+            then False
+            else
+              True
+
+main = do
+  print $ eligible 300 -- True
+  print $ eligible 299 -- False
+```
+
+[03_Hell/02_Monads/10_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/10_Monads.lhs)
+
+***
+
+[03_Hell/02_Monads/11_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/11_Monads.lhs)
+
+Şimdi `Maybe` kullanarak ve monadlardan faydalanarak iyileştirelim:
+
+```haskell
+deposit :: (Num a) => a -> a -> Maybe a
+deposit value account = Just (account + value)
+
+withdraw :: (Num a,Ord a) => a -> a -> Maybe a
+withdraw value account = if (account < value) 
+                         then Nothing 
+                         else Just (account - value)
+
+eligible :: (Num a, Ord a) => a -> Maybe Bool
+eligible account = do
+  account1 <- deposit 100 account 
+  account2 <- withdraw 200 account1 
+  account3 <- deposit 100 account2 
+  account4 <- withdraw 300 account3 
+  account5 <- deposit 1000 account4
+  Just True
+
+main = do
+  print $ eligible 300 -- Just True
+  print $ eligible 299 -- Nothing
+```
+
+[03_Hell/02_Monads/11_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/11_Monads.lhs)
+
+***
+
+[03_Hell/02_Monads/12_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/12_Monads.lhs)
+
+Kötü değil, ama daha da iyileştirebiliriz:
+
+```haskell
+deposit :: (Num a) => a -> a -> Maybe a
+deposit value account = Just (account + value)
+
+withdraw :: (Num a,Ord a) => a -> a -> Maybe a
+withdraw value account = if (account < value) 
+                         then Nothing 
+                         else Just (account - value)
+
+eligible :: (Num a, Ord a) => a -> Maybe Bool
+eligible account =
+  deposit 100 account >>=
+  withdraw 200 >>=
+  deposit 100  >>=
+  withdraw 300 >>=
+  deposit 1000 >>
+  return True
+
+main = do
+  print $ eligible 300 -- Just True
+  print $ eligible 299 -- Nothing
+```
+
+Monadların kodumuzu daha zarifleştirmenin iyi bir yolu olduğunu gösterdik. Dikkat edin ki, bu tip bir kod düzenlemesi, özellikle `Maybe`, pek çok imperatif dilde de uygulanabilir. Aslında, bu tip bir yapıyı normalde de yapıyoruz.
+
+> Önemli bir nokta: Dizideki ilk elemanın `Nothing` olarak hesaplanması tüm hesaplamayı durduracaktır. Bu demek oluyor ki, tüm satırları hesaplamıyorsunuz. Tembellik sayesinde bunun için fazladan bir şey yapmanıza gerek yok.
+
+Bunu göz önünde bulundurarak `Maybe` için `(>>=)` fonksiyonunu şöyle tanımlayabilirsiniz:
+
+```haskell
+instance Monad Maybe where
+    (>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
+    Nothing  >>= _  = Nothing
+    (Just x) >>= f  = f x
+
+    return x = Just x
+```
+
+Bu basit örnek ile `Maybe` monadının ne kadar kullanışlı olabileceğini ve nasıl kullanılabileceğini gördük. Ama daha iyi bir örnek için listelere bakalım.
+
+[03_Hell/02_Monads/12_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/12_Monads.lhs)
+
+***
+
+[03_Hell/02_Monads/13_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/13_Monads.lhs)
+
+### 4.3.2. Liste Monad'ı
+
+![liste](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/golconde.jpg)
+
+Liste monadı deterministik (belirlenimci) olmayan hesaplamaları simüle etmemize yardımcı olur. Şöyle:
+
+```haskell
+import Control.Monad (guard)
+
+allCases = [1..10]
+
+resolve :: [(Int,Int,Int)]
+resolve = do
+              x <- allCases
+              y <- allCases
+              z <- allCases
+              guard $ 4*x + 2*y < z
+              return (x,y,z)
+
+main = do
+  print resolve
+```
+
+Resmen sihirbazlık.
+
+```haskell
+[(1,1,7),(1,1,8),(1,1,9),(1,1,10),(1,2,9),(1,2,10)]
+```
+
+Liste monadı için, şöyle bir söz dizimsel kolaylık da vardır:
+
+```haskell
+  print $ [ (x,y,z) | x <- allCases,
+                      y <- allCases,
+                      z <- allCases,
+                      4*x + 2*y < z ]
+```
+
+Tüm monadları sıralamayacağım, ancak bir sürü monad bulunmakta. Saf dillerdeki belli kavramlar monad kullanımı ile basitleştirilebilir. Özellikle monadlar şunlar için kullanışlıdır:
+
+* IO
+* deterministik olmayan hesaplamalar
+* (sözde) rastgele sayı üretimi
+* konfigürasyon durumunu tutma
+* yazma durumu
+* ..
+
+Eğer buraya kadar beni takip edebildiyseniz, başardınız! Monadları öğrendiniz!
+
+[03_Hell/02_Monads/13_Monads.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/02_Monads/13_Monads.lhs)
+
+# 5. Ekler
+
+Bu bölüm doğrudan Haskell'le ilgili değil. Bazı ayrıntılı açıklamalar için okuyabilirsiniz.
+
+[04_Appendice/01_More_on_infinite_trees/10_Infinite_Trees.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/04_Appendice/01_More_on_infinite_trees/10_Infinite_Trees.lhs)
+
+## 5.1. Sonsuz Ağaçlar Hakkında
 
 
 
