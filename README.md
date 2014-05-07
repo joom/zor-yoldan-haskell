@@ -1,5 +1,7 @@
 > This is the Turkish translation of Yann Esposito's article [Learn Haskell Fast and Hard](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/).
 
+> Bu yazı Yann Esposito'nun [Learn Haskell Fast and Hard](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/) Türkçe çevirisidir.
+
 # Zor Yoldan Haskell
 
 > TL, DR (Çok uzundu okumadım): Haskell öğrenmek için kısa ve yoğun bir rehber.
@@ -32,7 +34,7 @@
     * [Sonsuz Yapılar](#33-sonsuz-yap%C4%B1lar)
 * [Çok Zor Kısım](#4-%C3%87ok-zor-k%C4%B1s%C4%B1m)
     * [IO ile Baş Etmek](#41-io-ile-ba%C5%9F-etmek)
-    * IO'nun Püf Noktası
+    * [IO'nun Püf Noktası](#42-ionun-p%C3%BCf-noktas%C4%B1)
     * Monad
         * Maybe Monad'ı
         * Liste Monad'ı
@@ -1972,10 +1974,86 @@ Haskell'de bu durum gizli değildir. Tam tersine, Haskell'de `main`'in dünyanı
 main :: World -> World
 ```
 
-Bu değişkene tüm fonksiyonların erişimi yoktur. Erişimi olan fonksiyonlar saf değildir. Dünya değişkenine erişimi olmayan fonksiyonlar ise saftır.
+Bu değişkene tüm fonksiyonların erişimi yoktur. Erişimi olan fonksiyonlar saf değildir. Dünya değişkenine erişimi olmayan fonksiyonlar ise saftır. [^fn-6]
 
+Haskell, dünyanın durumunu `main` fonksiyonuna bir girdi değişkeni olarak görür. Ama `main`'in asıl tipi suna daha yakındır: [^fn-7]
 
+```haskell
+main :: World -> ((),World)
+```
 
+`()` tipi birim tipidir. Burda görülecek bir şey yok.
+
+Şimdi bunu aklımızda tutarak `main` fonksiyonumuzu baştan yazalım:
+
+```haskell
+main w0 =
+    let (list,w1) = askUser w0 in
+    let (x,w2) = print (sum list,w1) in
+    x
+```
+
+İlk olarak, yan etkisi olan tüm fonksiyonların şu tipte olması gerektiğini hatırlayalım:
+
+```haskell
+World -> (a,World)
+```
+
+Burada `a` sonucun tipi oluyor. Örneğin `getChar` fonksiyonu bu durumda `World -> (Char,World)` tipindedir.
+
+Dikkat edilmesi gereken diğer bir şey ise hesaplama/değerlendirme sırası. Örneğin `f a b`'yi hesaplarken birden fazla seçeneğiniz var:
+
+* önce `a`'yi, sonra `b`'yi, sonra da `f a b`'yi hesapla.
+* önce `b`'yi, sonra `a`'yi, sonra da `f a b`'yi hesapla.
+* `a`'yi ve `b`'yi paralel olarak, sonra da `f a b`'yi hesapla.
+
+Bu böyle çünkü dilin saf kısmında çalışıyoruz.
+
+Şimdi, eğer `main` fonksiyonuna bakarsanız, ilk satırı ikinci satırdan önce hesaplamanız gerektiği açık, çünkü ikinci satırda birinci satırda elde ettiğiniz bir değeri parametre olarak kullanıyorsunuz.
+
+Bu işe yarıyor. Derleyici her adımda yeni bir gerçek dünya tanımı/kodu (*id*) sağlıyor. Gizli olarak, `print` şöyle işliyor:
+
+* ekrana bir şey yazdır
+* dünyanın id'sini değiştir.
+* `((), yeni dünya id'si)` değerini döndür.
+
+Şimdi, eğer `main` fonksiyonunun stiline bakarsanız, biraz garip olduğunu göreceksiniz. Aynısını `askUser` fonksiyonuna da uygulayalım:
+
+```haskell
+askUser :: World -> ([Integer],World)
+```
+
+Öncesi:
+
+```haskell
+askUser :: IO [Integer]
+askUser = do
+  putStrLn "Bir sayi listesi girin:"
+  input <- getLine
+  let maybeList = getListFromString input in
+      case maybeList of
+          Just l  -> return l
+          Nothing -> askUser
+```
+
+Sonrası:
+
+```haskell
+askUser w0 =
+    let (_,w1)     = putStrLn "Bir sayi listesi girin:" in
+    let (input,w2) = getLine w1 in
+    let (l,w3)     = case getListFromString input of
+                      Just l   -> (l,w2)
+                      Nothing  -> askUser w2
+    in
+        (l,w3)
+```
+
+Benzer, ama biraz daha garip. Tüm şu geçici `w?`'lere bakın.
+
+Çıkarılacak ders şu: Saf fonksiyonel dillerdeki naif IO uygulamaları gariptir!
+
+Şanslıyız ki, bu sorunu halletmek için daha iyi bir yol var.
 
 ***
 
@@ -1990,3 +2068,7 @@ Bu değişkene tüm fonksiyonların erişimi yoktur. Erişimi olan fonksiyonlar 
 [^fn-4]: `squareEvenSum''` fonksiyonunun diğer ikisinden daha verimli olduğuna dikkat edin. `(.)` fonksiyonunun sırası önemlidir.
 
 [^fn-5]: Ki kendisi JavaScript'te JSON bulunduran bir karakter dizisi üzerinde `eval` çalıştırmaya çok benzer. (Çevirmen notu: `JSON.parse` daha iyi çözüm olabilir.)
+
+[^fn-6]: Bu kurala bazı güvenli olmayan istisnalar da var. Ama belki hata ayıklama amacı dışında hiçbir gerçek uygulamada böyle bir kullanım görmezsiniz.
+
+[^fn-7]: Merak edenler için: gerçek tip şöyle: `data IO a = IO {unIO :: State# RealWorld -> (# State# RealWorld, a #)}`. `#` işareti optimizasyonla ilgili, ve ben örneğimde alan yerlerini değiştirdim. Ama ana fikir bu.
