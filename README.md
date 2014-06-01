@@ -76,7 +76,7 @@ Bu yazının beş bölümü var:
     * Sonsuz ağaçlar hakkında matematik tabanlı bir tartışma.
 
 > Her `.lhs` ile biten bir dosya isimli ayırıcı gördüğünüzde, dosyaya ulaşmak için tıklayabilirsiniz. Dosyayı `dosyaismi.lhs` diye kaydederseniz, `runhaskell dosyaismi.lhs` komutuyla çalıştırabilirsiniz. Bazıları çalışmayabilir ama çoğu çalışacaktır. Aşağıda bir link görebilirsiniz.
-[01_basic/10_İntroduction/00_hello_world.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/00_hello_world.lhs)
+[01_basic/10_Introduction/00_hello_world.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/00_hello_world.lhs)
 (Çevirmen notu: Kodlardaki karakter dizileri Turkçeleştirilmiş, ancak değişken isimleri aynı bırakılmıştır. İndirilen kodlar İngilizce kaynaktan olup Türkçeleştirilmemiş olacaktır.)
 
 # 1. Giriş
@@ -1735,9 +1735,9 @@ Daha da ilginç şekilde, `do` bloğunun içindeki her ifadenin `IO a` tipinde o
 
 ```haskell
 main = do
-  putStrLn "Enter ... " :: İÖ ()
-  getLine               :: İÖ String
-  print Something       :: İÖ ()
+  putStrLn "Enter ... " :: IO ()
+  getLine               :: IO String
+  print Something       :: IO ()
 ```
 
 Ayrıca `<-` işaretinin etkisine de dikkat edelim.
