@@ -590,7 +590,7 @@ Zor kısım şimdi başlıyor.
 
 ![Functional](http://yannesposito.com/Scratch/img/blog/Haskell-the-Hard-Way/hr_giger_biomechanicallandscape_500.jpg)
 
-Bu bölümde, Haskell'in etkileyici yeniden yapılandırma *(refaçtoring)* yeteneklerini göreceğiz. Bir problem seçip önce standart imperatif yolla çözeceğiz. Daha sonra kodun evrimini göreceğiz, son hali çok daha zarif ve kolay anlaşılabilir olacak.
+Bu bölümde, Haskell'in etkileyici yeniden yapılandırma *(refactoring)* yeteneklerini göreceğiz. Bir problem seçip önce standart imperatif yolla çözeceğiz. Daha sonra kodun evrimini göreceğiz, son hali çok daha zarif ve kolay anlaşılabilir olacak.
 
 Aşağıdaki problemi çözelim:
 
@@ -807,7 +807,7 @@ foo (x:xs) = if even x
                  else foo n xs
 ```
 
-Bu cok kullanisli bir ozellik. Ayni zamanda kodumuzu daha kisa ve okunakli kiliyor.
+Bu çok kullanışlı bir özellik. Aynı zamanda kodumuzu daha kısa ve okunaklı kılıyor.
 
 [02_Hard_Part/13_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/02_Hard_Part/13_Functions.lhs)
 
