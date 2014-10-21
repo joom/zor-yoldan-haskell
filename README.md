@@ -63,7 +63,7 @@ Tersi şekilde, bu yazı Haskell'in ana konularının oldukça kısa ve yoğun b
 
 Bu yazının beş bölümü var:
 * Giriş: Haskell'in insancıl olabildiğini göstermek için bir kısa örnek.
-* Temel Haskell: Haskell şöz dizimi ve bazı temel kavramlar.
+* Temel Haskell: Haskell söz dizimi ve bazı temel kavramlar.
 * Zor Bölüm:
     * Fonksiyonel stil; imperatif stilden fonksiyonel stile kademeli bir örnek.
     * Tipler; tipler ve standard bir ikili ağaç *(binary tree)* örneği.
@@ -216,7 +216,7 @@ end
     (+ (* x x) (* y y)))
 ```
 
-Son olara, Haskell yolu da budur:
+Son olarak, Haskell yolu da budur:
 ```haskell
 f x y = x*x + y*y
 ```
@@ -578,7 +578,7 @@ absolute' x
     | otherwise = -x
 ```
 
-> Haskell'de paragraf başı / boşluklar önemlidir. Python'daki gibi kötü boşluklar kodunuzu bozabilir.
+> Haskell'de paragraf başı / boşluklar önemlidir. Python'daki gibi, kötü boşluklar kodunuzu bozabilir.
 
 [01_basic/20_Essential_Haskell/10a_Functions.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/20_Essential_Haskell/10a_Functions.lhs)
 
