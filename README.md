@@ -43,7 +43,7 @@
 
 ***
 
-Tüm geliştiricilerin Haskell öğrenmesi gerektiğine inanıyorum. Herkesin süper Haskell ninjası olması gerektiğini düşünmüyorum, ama herkes Haskell'in sahip olduğu farklı yönleri görmeli. Haskell öğrenmek zihninizi acar.
+Tüm geliştiricilerin Haskell öğrenmesi gerektiğine inanıyorum. Herkesin süper Haskell ninjası olması gerektiğini düşünmüyorum, ama herkes Haskell'in sahip olduğu farklı yönleri görmeli; Haskell öğrenmek zihninizi acar.
 
 Anaakım diller aynı temelleri paylaşırlar:
 * değişkenler
@@ -51,13 +51,13 @@ Anaakım diller aynı temelleri paylaşırlar:
 * işaretçiler *(pointer)* [^fn-1]
 * veri yapıları, nesneler ve sınıflar (genellikle)
 
-Haskell çok farklıdır. Bu dil daha önce hiç duymamış olduğum bir sürü kavram kullanıyor. Bu kavramların çoğu daha iyi bir programcı olmanızda yardımcı olacaktır.
+Ama Haskell çok farklıdır. Bu dil daha önceden hiç duymamış olduğum bir sürü kavram kullanıyor. Bu kavramların çoğu daha iyi bir programcı olmanızda yardımcı olacaktır.
 
-Ama Haskell öğrenmek zor olabilir. Benim için öyleydi. Bu yazıda ben öğrenirken eksik olan şeyleri size sağlamaya çalışacağım.
+Haskell öğrenmek zor olabilir, benim için öyleydi. Bu yazıda ben öğrenirken eksik olan şeyleri size sunmaya çalışacağım.
 
-Bu yazıyı takip etmek zor olacak. Bunu bilerek yapıyorum. Haskell öğrenmenin kısayolu yoktur. Zordur ve çaba ister. Ama bunun iyi bir şey olduğuna inanıyorum. Haskell, zor olduğu için ilginç.
+Bu yazıyı takip etmek zor olacak ve bunu bilerek yapıyorum; Haskell öğrenmenin kısayolu yoktur, zordur ve çaba ister. Ama bunun iyi bir şey olduğuna inanıyorum; Haskell, zor olduğu için ilginç.
 
-Haskell öğrenmenin klasik yolu iki kitap okumaktır. İlk önce ["Learn You a Haskell"](http://learnyouahaskell.com/) (Haskell Öğrenin) ve sonrasında da ["Real World Haskell"](http://www.realworldhaskell.org/) (Gerçek Dünyada Haskell). Ben de bunun doğru yol olduğuna inanıyorum. Haskell'in doğru düzgün öğrenmek için, bu kitapları ayrıntılı şekilde okumalısınız.
+Haskell öğrenmenin klasik yolu şu iki kitabı okumaktır. İlk önce ["Learn You a Haskell"](http://learnyouahaskell.com/) (Haskell Öğrenin) ve sonrasında da ["Real World Haskell"](http://www.realworldhaskell.org/) (Gerçek Dünyada Haskell). Ben de bunun doğru yol olduğuna inanıyorum. Haskell'in doğru düzgün öğrenmek için, bu kitapları ayrıntılı şekilde okumalısınız.
 
 Tersi şekilde, bu yazı Haskell'in ana konularının oldukça kısa ve yoğun bir özeti. Kendim Haskell öğrenirken ihtiyaç duyup bulamadığım bazı bilgileri de ekledim.
 
@@ -77,7 +77,7 @@ Bu yazının beş bölümü var:
 
 > Her `.lhs` ile biten bir dosya isimli ayırıcı gördüğünüzde, dosyaya ulaşmak için tıklayabilirsiniz. Dosyayı `dosyaismi.lhs` diye kaydederseniz, `runhaskell dosyaismi.lhs` komutuyla çalıştırabilirsiniz. Bazıları çalışmayabilir ama çoğu çalışacaktır. Aşağıda bir link görebilirsiniz.
 [01_basic/10_Introduction/00_hello_world.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/01_basic/10_Introduction/00_hello_world.lhs)
-(Çevirmen notu: Kodlardaki karakter dizileri Turkçeleştirilmiş, ancak değişken isimleri aynı bırakılmıştır. İndirilen kodlar İngilizce kaynaktan olup Türkçeleştirilmemiş olacaktır.)
+(Çevirmen notu: Kodlardaki karakter dizileri Türkçeleştirilmiş, ancak değişken isimleri aynı bırakılmıştır. İndirilen kodlar İngilizce kaynaktan olup Türkçeleştirilmemiş olacaktır.)
 
 # 1. Giriş
 
@@ -139,7 +139,7 @@ puts "Merhaba #{name}!"
 int main (int argc, char **argv) {
     char name[666]; // <- musibetli sayi!
     // Adim 665 karakterden fazlaysa ne olacak?
-    printf("Adiniz nedir?\n"); 
+    printf("Adiniz nedir?\n");
     scanf("%s", name);
     printf("Merhaba %s!\n", name);
     return 0;
@@ -183,34 +183,34 @@ Son uyarı da Haskell kodunu nasıl okumanız gerektiğiyle ilgili. Benim için,
 ### 1.3.1. Fonksiyon tanımı
 Şu şekilde fonksiyon tanımlamaya alışmış olabilirsiniz:
 
-`C`'de:
+C'de:
 ```c
 int f(int x, int y) {
     return x*x + y*y;
 }
 ```
 
-`JavaScript`'te:
+JavaScript'te:
 ```javascript
 function f(x,y) {
     return x*x + y*y;
 }
 ```
 
-`Python`'da:
+Python'da:
 ```python
 def f(x,y):
     return x*x + y*y
 ```
 
-`Ruby`'de:
+Ruby'de:
 ```ruby
 def f(x,y)
     x*x + y*y
 end
 ```
 
-`Scheme`'de:
+Scheme'de:
 ```scheme
 (define (f x y)
     (+ (* x x) (* y y)))
@@ -525,7 +525,7 @@ Hatırlatma:
 ```haskell
 x :: Int            ⇔ x Int tipinde herhangi bir deger alabilir
 x :: a              ⇔ x herhangi bir tip olabilir
-x :: Num a => a     ⇔ x Num tip sinifina dahil olan 
+x :: Num a => a     ⇔ x Num tip sinifina dahil olan
                          herhangi bir a tipi olabilir
 f :: a -> b         ⇔ f a'dan b'ye bir fonksiyondur
 f :: a -> b -> c    ⇔ f a'dan (b→c)'ye bir fonksiyondur
@@ -537,7 +537,7 @@ Hatırlayın ki bir fonksiyonu tanımlamadan önce tipini belirtmek zorunlu değ
 #### Orta notasyon
 
 ```haskell
-square :: Num a => a -> a  
+square :: Num a => a -> a
 square x = x^2
 ```
 
@@ -549,7 +549,7 @@ square' x = (^) x 2
 square'' x = (^2) x
 ```
 
-Soldaki ve sağdaki `x`'leri silebiliriz. Buna η sadeleştirmesi deniyor.
+Soldaki ve sağdaki `x`'leri silebiliriz. Buna η (eta) sadeleştirmesi deniyor.
 
 ```haskell
 square''' = (^2)
@@ -615,7 +615,7 @@ Haskell'de, farklı olarak, değişkenler veya `for` döngüleri yoktur. Döngü
 
 > Dikkat: Özyineleme imperatif dillerde genellikle yavaş olarak algılanır. Fonksiyonel programlamada genellikle durum bu değildir. Çoğu zaman Haskell özyinelemeli fonksiyonları verimli şekilde işler.
 
-İşte özyinelemeli fonksiyonun `C` versiyonu. Basitlik için tam sayı listesinin ilk `0` değeri ile bittiğini varsaydığıma dikkat edin.
+İşte özyinelemeli fonksiyonun C versiyonu. Basitlik için tam sayı listesinin ilk `0` değeri ile bittiğini varsaydığıma dikkat edin.
 
 ```c
 int evenSum(int *list) {
@@ -689,8 +689,8 @@ evenSum l = accumSum 0 l
 
 accumSum n l = if l == []
                   then n
-                  else let x = head l 
-                           xs = tail l 
+                  else let x = head l
+                           xs = tail l
                        in if even x
                               then accumSum (n+x) xs
                               else accumSum n xs
@@ -704,7 +704,7 @@ GHCi, version 7.0.3: http://www.haskell.org/ghc/  :? for help
 Loading package ghc-prim ... linking ... done.
 Loading package integer-gmp ... linking ... done.
 Loading package base ... linking ... done.
-Prelude> :load 11_Functions.lhs 
+Prelude> :load 11_Functions.lhs
 [1 of 1] Compiling Main             ( 11_Functions.lhs, interpreted )
 Ok, modules loaded: Main.
 *Main> evenSum [1..5]
@@ -751,11 +751,11 @@ Daha sonra, `where` veya `let` kullanarak alt fonksiyonlar tanımlayabiliriz. Bu
 evenSum :: Integral a => [a] -> a
 
 evenSum l = accumSum 0 l
-    where accumSum n l = 
+    where accumSum n l =
             if l == []
                 then n
-                else let x = head l 
-                         xs = tail l 
+                else let x = head l
+                         xs = tail l
                      in if even x
                             then accumSum (n+x) xs
                             else accumSum n xs
@@ -772,9 +772,9 @@ Sonra, örüntülü eşleme *(pattern matching)* kullanabiliriz.
 ```haskell
 -- Versiyon 3
 evenSum l = accumSum 0 l
-    where 
+    where
         accumSum n [] = n
-        accumSum n (x:xs) = 
+        accumSum n (x:xs) =
              if even x
                 then accumSum (n+x) xs
                 else accumSum n xs
@@ -792,9 +792,9 @@ foo l  =  <y>
 Ama örüntülü eşleme bundan daha fazlası. Aynı zamanda karmaşık bir değerin iç verişini takip etmenin bir yolu. Şu kodun yerine:
 
 ```haskell
-foo l =  let x  = head l 
+foo l =  let x  = head l
              xs = tail l
-         in if even x 
+         in if even x
              then foo (n+x) xs
              else foo n xs
 ```
@@ -802,7 +802,7 @@ foo l =  let x  = head l
 şunu yazabiliriz:
 
 ```haskell
-foo (x:xs) = if even x 
+foo (x:xs) = if even x
                  then foo (n+x) xs
                  else foo n xs
 ```
@@ -834,9 +834,9 @@ Bu metodu `l`'yi kaldirmak icin kullanalim:
 evenSum :: Integral a => [a] -> a
 
 evenSum = accumSum 0
-    where 
+    where
         accumSum n [] = n
-        accumSum n (x:xs) = 
+        accumSum n (x:xs) =
              if even x
                 then accumSum (n+x) xs
                 else accumSum n xs
@@ -958,7 +958,7 @@ Burada ne olduğunu anlamanız için adım adım neler olduğuna bakalım:
   evenSum [1,2,3,4]
 ⇒ foldl' (+) 0 (filter even [1,2,3,4])
 ⇒ foldl' (+) 0 [2,4]
-⇒ foldl' (+) (0+2) [4] 
+⇒ foldl' (+) (0+2) [4]
 ⇒ foldl' (+) 2 [4]
 ⇒ foldl' (+) (2+4) []
 ⇒ foldl' (+) 6 []
@@ -983,7 +983,7 @@ evenSum = (foldl' (+) 0) . (filter even)
 Ayrıca, bazı kısımları daha iyi açıklamak için yeniden isimlendirebiliriz:
 
 ```haskell
--- Versiyon 10 
+-- Versiyon 10
 import Data.List (foldl')
 sum' :: (Num a) => [a] -> a
 sum' = foldl' (+) 0
@@ -1007,7 +1007,7 @@ squareEvenSum' = evenSum . (map (^2))
 squareEvenSum'' = sum' . (map (^2)) . (filter even)
 ```
 
-Sadece bir tane daha transformasyon fonksiyonu ekledik, o kadar. [^fn-4] 
+Sadece bir tane daha transformasyon fonksiyonu ekledik, o kadar. [^fn-4]
 
 ```haskell
 map (^2) [1,2,3,4] ⇔ [1,4,9,16]
@@ -1019,7 +1019,7 @@ Fonksiyon tanımının *içinde* herhangi bir şey değiştirmek zorunda kalmad�
 
 Versiyon 1'i değiştirmek de okura bir alıştırma olarak kalsın. ☺.
 
-Eğer genellemenin sonuna geldiğimizi düşünüyorsanız, oldukça yanılıyorsunuz. Örneğin, bunu sadece liste değil başka herhangi bir özyinelemeli türde kullanmanın yolları var. Eğer nasıl olduğunu bilmek istiyorsanız, size şu eğlenceli makaleyi okumanızı öneriyorum: [Müz, Mercek, Zarf ve Dikenli Tellerle Fonksiyonel Programlama - Meijer, Fokkinga ve Paterson.](http://eprints.eemcs.utwente.nl/7281/01/db-utwente-40501F46.pdf)
+Eğer genellemenin sonuna geldiğimizi düşünüyorsanız, oldukça yanılıyorsunuz. Örneğin, bunu sadece liste değil başka herhangi bir özyinelemeli türde kullanmanın yolları var. Eğer nasıl olduğunu bilmek istiyorsanız, size şu eğlenceli makaleyi okumanızı öneriyorum: [Muz, Mercek, Zarf ve Dikenli Tellerle Fonksiyonel Programlama - Meijer, Fokkinga ve Paterson.](http://eprints.eemcs.utwente.nl/7281/01/db-utwente-40501F46.pdf)
 
 Bu örnek size saf fonksiyonel programlamanın ne kadar güzel olduğunu göstermeli. Ne yazık ki, saf fonksiyonel programlama her kullanıma tam uygun değil. Ya da en azından öyle bir programlama dili henüz mevcut değil.
 
@@ -1130,7 +1130,7 @@ Tip çıkarımı Haskell'de dinamik tip sistemli dillerin yarattığı özgürl�
 
 ### 3.2.2. Tip Oluşturma
 
-Kendi tiplerinizi oluşturabilirsiniz. İlk önce takma adlarla, yani tip eşanlamlılarıyla başlayalım. 
+Kendi tiplerinizi oluşturabilirsiniz. İlk önce takma adlarla, yani tip eşanlamlılarıyla başlayalım.
 
 ```haskell
 type Name   = String
@@ -1248,7 +1248,7 @@ Eğer bu veri tipini ekrana yazdırmak (`Show`), karakter dizisinden çevirmek (
 
 ```haskell
 infixr 5 :::
-data List a = Nil | a ::: (List a) 
+data List a = Nil | a ::: (List a)
               deriving (Show,Read,Eq,Ord)
 ```
 
@@ -1614,8 +1614,8 @@ Nöronlarınızı biraz daha ısındırmak için daha ilginç bir ağaca bakalı
 ```haskell
 iTree = Node 0 (dec iTree) (inc iTree)
         where
-           dec (Node x l r) = Node (x-1) (dec l) (dec r) 
-           inc (Node x l r) = Node (x+1) (inc l) (inc r) 
+           dec (Node x l r) = Node (x-1) (dec l) (dec r)
+           inc (Node x l r) = Node (x+1) (inc l) (inc r)
 ```
 
 Bu ağacı oluşturmanın başka bir yolu da üst derece fonksiyonları kullanmaktır. Bu fonksiyon `map` fonksiyonuna benziyor, ama listeler yerine `BinTree`'ler üzerinde çalışıyor. Ortaya şöyle bir fonksiyon çıkacak:
@@ -1624,8 +1624,8 @@ Bu ağacı oluşturmanın başka bir yolu da üst derece fonksiyonları kullanma
 -- bir fonksiyonu agacin her dugumune uygular
 treeMap :: (a -> b) -> BinTree a -> BinTree b
 treeMap f Empty = Empty
-treeMap f (Node x left right) = Node (f x) 
-                                     (treeMap f left) 
+treeMap f (Node x left right) = Node (f x)
+                                     (treeMap f left)
                                      (treeMap f right)
 ```
 
@@ -1635,8 +1635,8 @@ treeMap f (Node x left right) = Node (f x)
 
 ```haskell
 infTreeTwo :: BinTree Int
-infTreeTwo = Node 0 (treeMap (\x -> x-1) infTreeTwo) 
-                    (treeMap (\x -> x+1) infTreeTwo) 
+infTreeTwo = Node 0 (treeMap (\x -> x-1) infTreeTwo)
+                    (treeMap (\x -> x+1) infTreeTwo)
 ```
 
 Şunun sonucuna bakalım:
@@ -1670,7 +1670,7 @@ main = print $ treeTakeDepth 4 infTreeTwo
 Buraya kadar geldiyseniz tebrikler! Şimdi gerçekten çok zor kısım başlayabilir.
 
 Eğer benim gibiyseniz, fonksiyonel stili anlamış olmalısınız. Ayrıca tembelliğin varsayılan olmasının avantajlarını da biraz anlamış olmalısınız. Ama gerçek bir program yapmaya nereden başlamanız gerektiğini bilmiyorsunuz. Özellikle de şu soruların cevaplarını:
-* Yan etkilerle nasıl bas edilir?
+* Yan etkilerle nasıl baş edilir?
 * Neden IO (girdi-çıktı) ile baş etmek için imperatifliğe benzer bir notasyon var?
 
 Karmaşık cevaplara hazır olun. Ama hepsi sonunda çok faydalı.
@@ -1744,7 +1744,7 @@ Ayrıca `<-` işaretinin etkisine de dikkat edelim.
 
 ```
 do
- x <- something -- bir seyler  
+ x <- something -- bir seyler
 ```
 
 Eğer `something :: IO a` tipinde ise `x :: a`'dir.
@@ -1772,7 +1772,7 @@ Bu iki çeşit komut aksiyonları sıralamanın iki farklı yolunu ifade ediyor.
 
 [03_Hell/01_IO/02_progressive_io_example.lhs](http://yannesposito.com/Scratch/en/blog/Haskell-the-Hard-Way/code/03_Hell/01_IO/02_progressive_io_example.lhs)
 
-Simdi programimizin nasil davrandigina bakalim. Ornegin, eger kullanici garip bir sey girerse ne olacak? Deneyelim:
+Şimdi programımızın nasıl davrandığına bakalım. Örneğin, eğer kullanıcı garip bir şey girerse ne olacak? Deneyelim:
 
 ```
     % runghc 02_progressive_io_example.lhs
@@ -1830,7 +1830,7 @@ Hata durumunda, iyi sayılabilecek bir hata mesajı göstermiş olalım.
 
 Bu programda fark etmeniz gereken şey tanımladığımız fonksiyonların tipleri. Yazdığımız fonksiyonlar arasında sadece bir tanesinin tipinde `IO` var: `main`. Bu demek oluyor ki `main` saf olmayan bir fonksiyon. Ama `main` içinde saf bir fonksiyon olan  `getListFromString` kullanılıyor. Yani sadece bakarak bile fonksiyonların saf olup olmadıklarını anlayabilirsiniz.
 
-Peki saflık neden önemlidir? Bir sürü avantajının ucu şunlar:
+Peki saflık neden önemlidir? Bir sürü avantajının üçü şunlar:
 
 * Saf kod hakkında mantık yürütmek saf olmayan kod hakkında mantık yürütmekten çok daha kolaydır.
 * Saflık sizi yan etkilerden ötürü kolayca test edemeyeceğiniz hatalardan korur.
@@ -2288,7 +2288,7 @@ maybeRead s = case reads s of
 getListFromString :: String -> Maybe [Integer]
 getListFromString str = maybeRead $ "[" ++ str ++ "]"
 askUser :: IO [Integer]
-askUser = 
+askUser =
     putStrLn "Bir sayi listesi girin (virgullerle ayirin):" >>
     getLine >>= \input ->
     let maybeList = getListFromString input in
@@ -2396,16 +2396,16 @@ deposit :: (Num a) => a -> a -> Maybe a
 deposit value account = Just (account + value)
 
 withdraw :: (Num a,Ord a) => a -> a -> Maybe a
-withdraw value account = if (account < value) 
-                         then Nothing 
+withdraw value account = if (account < value)
+                         then Nothing
                          else Just (account - value)
 
 eligible :: (Num a, Ord a) => a -> Maybe Bool
 eligible account = do
-  account1 <- deposit 100 account 
-  account2 <- withdraw 200 account1 
-  account3 <- deposit 100 account2 
-  account4 <- withdraw 300 account3 
+  account1 <- deposit 100 account
+  account2 <- withdraw 200 account1
+  account3 <- deposit 100 account2
+  account4 <- withdraw 300 account3
   account5 <- deposit 1000 account4
   Just True
 
@@ -2427,8 +2427,8 @@ deposit :: (Num a) => a -> a -> Maybe a
 deposit value account = Just (account + value)
 
 withdraw :: (Num a,Ord a) => a -> a -> Maybe a
-withdraw value account = if (account < value) 
-                         then Nothing 
+withdraw value account = if (account < value)
+                         then Nothing
                          else Just (account - value)
 
 eligible :: (Num a, Ord a) => a -> Maybe Bool
@@ -2599,7 +2599,7 @@ Hey! Sonlanıyor! Ama dikkat edin, program sadece dallara koyacak veri olduğu s
 Örneğin:
 
 ```haskell
-treeTakeDepth 4 (treeFromList [1..]) 
+treeTakeDepth 4 (treeFromList [1..])
 ```
 
 sonsuza kadar çalışacak, çünkü `filter (<1) [2..]` ifadesinin ilk elemanını almaya çabalayacak. Ama `filter` fonksiyonu sonucun boş liste olduğunu anlayacak kadar akıllı değil.
@@ -2622,10 +2622,10 @@ Bu sorunları çözmek için `treeFromList` ve `shuffle` fonksiyonlarımızı bi
 
 ```haskell
 shuffle = map rand [1..]
-          where 
+          where
               rand x = ((p x) `mod` (x+c)) - ((x+c) `div` 2)
               p x = m*x^2 + n*x + o -- bir polinom
-              m = 3123    
+              m = 3123
               n = 31
               o = 7641
               c = 1237
@@ -2643,7 +2643,7 @@ Dikkat edin ki genel olarak sıralı bir ikili ağaç olarak kalacak. Ayrıca, y
 treeFromList :: (Ord a, Show a) => [a] -> BinTree a
 treeFromList []    = Empty
 treeFromList (x:xs) = Node x left right
-          where 
+          where
               left = treeFromList $ safefilter (<x) xs
               right = treeFromList $ safefilter (>x) xs
 ```
@@ -2657,10 +2657,10 @@ safefilter f l = safefilter' f l nbTry
       nbTry = 10000
       safefilter' _ _ 0 = []
       safefilter' _ [] _ = []
-      safefilter' f (x:xs) n = 
-                  if f x 
-                     then x : safefilter' f xs nbTry 
-                     else safefilter' f xs (n-1) 
+      safefilter' f (x:xs) n =
+                  if f x
+                     then x : safefilter' f xs nbTry
+                     else safefilter' f xs (n-1)
 ```
 
 Şimdi programı çalıştırıp mutlu olabilirsiniz:
@@ -2696,7 +2696,7 @@ Neden çalışmadığını ve sonsuz döngüye girebileceğini açıklayın.
 
 Özellikle, [Emm](https://github.com/Emm)'e, İngilizce'mi düzeltmekle uğraştığı zaman için binlerce kez teşekkür ederim.
 
-> Çevirmen Notu: Yazıda herhangi bir Türkçe karakter veya çeviri hatası bulursanız, beni bilgilendirirseniz, veya *pull request* yollayarak düzeltirseniz çok sevinirim. Daha iyi çevirilebileceğini düşündüğünüz bölümler için de bu geçerli. Teşekkürler.
+> Çevirmen Notu: Klavyemde Türkçe karakterler olmadığı için mecburen [deasciifier](https://github.com/joom/turkish-deasciifier.vim) kullanıyorum. Yazıda herhangi bir Türkçe karakter veya çeviri hatası bulursanız, beni bilgilendirirseniz, veya *pull request* yollayarak düzeltirseniz çok sevinirim. Daha iyi çevirilebileceğini düşündüğünüz bölümler için de bu geçerli. Teşekkürler.
 
 ***
 
