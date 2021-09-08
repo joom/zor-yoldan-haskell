@@ -476,7 +476,7 @@ Haskell'de `String` tipi, `Char` tipinden oluşmuş listeye denktir.
 "abc" ⇔ "ab"++"c"
 ```
 
-> Dikkat: Gerçek kodda, yazıyı temsil etmek için `Char` listesi kullamamalısınız. Genel olarak `Data.Text` kullanmalısınız. Eğer ASCİİ karakter akımını *(stream)* temsil etmek istiyorsanız, onun için de `Data.ByteString` kullanmalısınız.
+> Dikkat: Gerçek kodda, yazıyı temsil etmek için `Char` listesi kullanmamalısınız. Genel olarak `Data.Text` kullanmalısınız. Eğer ASCİİ karakter akımını *(stream)* temsil etmek istiyorsanız, onun için de `Data.ByteString` kullanmalısınız.
 
 ### Demetler *(Tuple)*
 
